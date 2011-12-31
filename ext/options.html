@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Dictionary Extension Options</title>
+    <link rel="stylesheet" type="text/css" href="options.css">
+    <script type="text/javascript" src="options.js"></script>
+  </head>
+  <body>
+    <div id="content">
+      <div id="title">
+        <img src="https://www.google.com/images/logos/dictionary_logo.gif"
+             title="Google Dictionary" alt="Google Dictionary">
+        <div>Extension Options</div>
+      </div>
+      <form name="options_form" action="">
+        <div class="option_row">
+          <div class="option_name">My language:</div>
+          <div class="option_value">
+            <div class="option_value_primary">
+              <select id="language_selector">
+                <option id="zh-CN" value="zh-CN">Chinese (Simplified)</option>
+                <option id="zh-TW" value="zh-TW">Chinese (Traditional)</option>
+                <option id="cs" value="cs">Czech</option>
+                <option id="nl" value="nl">Dutch</option>
+                <option id="en" value="en">English</option>
+                <option id="fr" value="fr">French</option>
+                <option id="de" value="de">German</option>
+                <option id="it" value="it">Italian</option>
+                <option id="ko" value="ko">Korean</option>
+                <option id="ru" value="ru">Russian</option>
+                <option id="es" value="es">Spanish</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="option_row">
+          <div class="option_name">Accesskey:</div>
+          <div class="option_value">
+            <div class="option_value_primary">
+              <input type="text" size="40" name="xdict_accesskey_text"
+                     id="xdict_accesskey_text">
+            </div>
+          </div>
+        </div>
+        <div class="option_row">
+          <div class="option_name">Pop-up definitions:</div>
+          <div class="option_value">
+            <div class="option_value_primary">
+              <input type="checkbox" name="popup_dblclick_checkbox"
+                     id="popup_dblclick_checkbox">
+              <label for="popup_dblclick_checkbox">
+                Display pop-up when I double-click a word
+              </label>
+            </div>
+            <div class="option_value_secondary">
+              <span id="popup_dblclick_text">Trigger key:</span>
+              <select name="popup_dblclick_key" id="popup_dblclick_key">
+                <option value="none">None</option>
+                <option value="ctrl" id="popup_dblclick_key_ctrl">Ctrl</option>
+                <option value="alt">Alt</option>
+                <option value="shift">Shift</option>
+              </select>
+            </div>
+            <div class="option_value_primary">
+              <input type="checkbox" name="popup_select_checkbox"
+                     id="popup_select_checkbox">
+              <label for="popup_select_checkbox">
+                Display pop-up when I select a word or phrase
+              </label>
+            </div>
+            <div class="option_value_secondary">
+              <span id="popup_select_text">Trigger key:</span>
+              <select name="popup_select_key" id="popup_select_key">
+                <option value="none">None</option>
+                <option value="ctrl" id="popup_select_key_ctrl">Ctrl</option>
+                <option value="alt">Alt</option>
+                <option value="shift">Shift</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="buttons">
+          <button id="save_button">Save</button>
+          <button id="reset_button">Reset</button>
+          <span id="save_status">Options saved</span>
+        </div>
+      </form>
+    </div>
+    <div class="footer">&copy;2011 Google -
+      <a href="http://www.google.com/privacy.html">Privacy</a>
+    </div>
+    <script type="text/javascript">initOptionsPage();</script>
+    <script type="text/javascript" src="ga.js"></script>
+  </body>
+</html>
