@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+<title>背单词</title>
+<style type="text/css">
+
+body {
+  background-color: whiteSmoke;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif
+    font-size: 13px;
+}
+
+#container {
+  margin: 20px auto;
+  /*color: #2B2B2B;*/
+  font-family: sans-serif; 
+  /*font: 13px Tahoma;*/
+  width: 800px;
+  background-color: #fff;
+  padding: 20px;
+  -moz-border-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  border-radius: 6px;
+  -moz-box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+  -webkit-box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+  -khtml-box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+  box-shadow: rgba(200,200,200,0.7) 0 4px 10px -1px;
+}
+
+#footer {
+  text-align: center;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 18px;
+  margin-bottom: 9px;
+  color: #404040;
+}
+
+a {
+  color: #0069d6;
+  text-decoration: none;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+a:hover {
+  color: #00438a;
+  text-decoration: underline;
+}
+
+#title {
+  font-size: 15px;
+  font-weight: bold;
+  padding:0 0 3px 8px;
+}
+
+#tip {
+  font-size: 10px;
+  padding-left: 5px;
+  /*float: right;*/
+  color: #C2C0C0;
+}
+
+#edit {
+  float: right;
+  font-size:11px;
+}
+
+#head {
+  margin: 15px 0 4px 0;
+  background-color: #E2EEFA;
+  /*background-color: #BCF;*/
+}
+
+table {
+  font-size: 13px;
+}
+
+div.row {
+  border-bottom: 1px solid #E2EEFA;
+  padding-bottom: 2px;
+}
+
+td.sn { width: 30px; }
+td.word { width: 120px; }
+td.phonetic { width: 100px; }
+td.meaning { width: 500px; }
+/*td.hits { width: 30px; }*/
+td.icon { width: 18px; display: none }
+
+</style>
+<script type="text/javascript">
+
+var EDITMODE = false;
+
+(function () {
+
+var xdw = xdw || {};
+xdw.debug = true;
+
+xdw.fetchWordList = function (callback) {
+    var xhr = new XMLHttpRequest;
+    xhr.open("GET", "/api/list", true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) try {
+            console.log(JSON.parse(xhr.responseText));
+            callback(JSON.parse(xhr.responseText));
+        } catch (e) {
+            console.log(e);
+            callback(null);
+        }
+    };
+    xhr.send()
+};
+
+window.deleteThis = function (id) {
+    var xhr = new XMLHttpRequest;
+    xhr.open("GET", "/api/delete?id=" + id, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) window.initialize()
+    };
+    xhr.send();
+};
+
+xdw.showEditColumn = function (show) {
+    var e = document.getElementsByClassName("icon");
+    if (show) {
+        e[0].style.display = "block";
+        for (var i = 1, l = e.length; i < l; i++) {
+            e[i].style.display = "inline";
+        }
+    } else {
+        for (var i = 0, l = e.length; i < l; i++) {
+            e[i].style.display = "none";
+        }
+    }
+};
+
+window.initialize = function () {
+    xdw.fetchWordList(function(a) {
+        console.log(a);
+
+        var p = '';
+        for (var i = 0, l = a.data.length; i < l; i++) {
+            var d = a.data[i];
+            p += '<div class="row"><table><tr>';
+            p += '<td class="icon"><a href="javascript:void(0);" onclick="deleteThis(' + d.id + ');"><img src="static/delete.png"></a></td>'
+            var phonetic = (d.phonetic && d.phonetic.length) ? '[' + d.phonetic + ']' : '';
+            p += '<td class="sn">' + (i+1) + '</td><td class="word">' + d.word + '</td><td class="phonetic">' + phonetic + '</td><td class="meaning">' + d.meaning + '</td><td class="hits">' + d.hits + '</td>'; //<td>' + d.update_time.split(' ')[0] + '</td>';
+            p += '</tr></table></div>';
+        }
+        
+        var e = document.getElementById("list");
+        e.innerHTML = p; 
+
+        xdw.showEditColumn(EDITMODE);
+
+        document.getElementById("tip").innerText = "共" + a.data.length + "个单词";
+    });
+};
+
+window.toggleMode = function (obj) {
+    EDITMODE = !EDITMODE;
+    xdw.showEditColumn(EDITMODE);
+    obj.innerText = EDITMODE ? "背诵" : "编辑";
+};
+
+})();
+
+</script>
+</head>
+<body onload="initialize()">
+<div id="container">
+
+<div style="padding-top:20px">
+<span id="title">{{ name }}的单词本</span>
+<span id="tip"></span>
+<a id="edit" href="javascript:void(0);" onclick="toggleMode(this);">编辑</a>
+</div>
+
+<div id="head">
+<table>
+<tr><td class="icon"></td><td class="sn">No</td><td class="word">单词</td><td class="phonetic">音标</td><td class="meaning">词义</td><td class="hits">Hits</td>
+</table>
+</div>
+
+<div id="list"></div>
+</div>
+
+<div id="footer">
+<p>© Copyright 2011 &nbsp;&nbsp;Code in <a href="https://github.com/chanfung032/xdictweb">Github</a> By <a href="http://alanchan.sinaapp.com">Alan Chan</a></p>
+</div>
+</div>
+</body>
+</html>
