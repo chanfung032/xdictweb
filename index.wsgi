@@ -69,6 +69,28 @@ class LoginHandler(tornado.web.RequestHandler):
 
         self.redirect('/')
 
+class HowtoHandler(BaseHandler):
+    def get(self):
+        uid = self.get_current_uid()
+        if not uid:
+            self.redirect(self.get_login_url())
+            return
+
+        row = self.db.get("""
+            select accesskey from xd_users where weibo_uid = %s
+        """, uid)
+        key = row.accesskey if row else None
+        if not key:
+            key = _build_accesskey()
+            self.db.execute("""
+                insert into xd_users(weibo_uid, accesskey)
+                values(%s, %s)
+            """, uid, key)
+
+        template_file = os.path.join(os.path.dirname(__file__), 
+                                     'templates', 'howto.html')
+        self.render(template_file, accesskey=key)
+
 class LogoutHandler(tornado.web.RequestHandler):
     def get(self):
         self.clear_all_cookies()
@@ -181,6 +203,7 @@ class RpcHandler(BaseHandler):
             return ''
 
 settings = {
+  "debug": True,
   "cookie_secret": "0xdeadbeef",
   "static_path": os.path.join(os.path.dirname(__file__), "static"),
 }
@@ -190,6 +213,7 @@ app = tornado.wsgi.WSGIApplication([
     (r"/api/(.*)", RpcHandler),
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
+    (r"/howto", HowtoHandler),
 ], **settings)
 
 try:
