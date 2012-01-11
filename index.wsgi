@@ -8,10 +8,10 @@ import datetime
 import urllib
 import urllib2
 import xml.dom.minidom
-import weibo
 import tornado.web
 import tornado.wsgi
 import tornado.database
+from weibopy import OAuthHandler, API
 
 from sae.const import (MYSQL_HOST, MYSQL_HOST_S,
     MYSQL_PORT, MYSQL_USER, MYSQL_PASS, MYSQL_DB
@@ -19,9 +19,6 @@ from sae.const import (MYSQL_HOST, MYSQL_HOST_S,
 
 APP_KEY = '2426835332'
 APP_SECRET = '594f4a061b1a481ce4e030fbd88681f9'
-
-callback = 'http://xdictweb.sinaapp.com/login'
-oauth = weibo.APIClient(APP_KEY, APP_SECRET, callback)
 
 def _build_accesskey():
     return ''.join([random.choice(string.letters) for n in range(40)])
@@ -35,37 +32,43 @@ class BaseHandler(tornado.web.RequestHandler):
         )
         
     def get_current_user(self):
-        k = self.get_secure_cookie('accesskey')
-        if not k: 
+        token = self.get_secure_cookie('token')
+        if not token: 
             return None
 
-        token, expires = k.split(',')
-        oauth.set_access_token(token, int(expires))
-        if oauth.is_expires():
-            return None
-
-        uid = oauth.get.account__get_uid().uid
-        screen_name = oauth.get.users__show(uid=uid).screen_name
-        return dict(uid=uid, name=screen_name)
+        key, secret = token.split(',')
+        oauth = OAuthHandler(APP_KEY, APP_SECRET)
+        oauth.setToken(key, secret)
+        return API(oauth).me()
 
     def get_current_uid(self):
         u = self.get_secure_cookie('u')
         return int(u) if u else None
 
-    def get_login_url(self):
-        return oauth.get_authorize_url()
+    def redirect_to_login(self):
+        callback = 'http://%s/login' % self.request.host
+        oauth = OAuthHandler(APP_KEY, APP_SECRET, callback)
+        url = oauth.get_authorization_url()
+        t = oauth.request_token
+        self.set_secure_cookie('request_token', ','.join([t.key, t.secret]))
+        self.redirect(url)
 
-class LoginHandler(tornado.web.RequestHandler):
+class LoginHandler(BaseHandler):
     def get(self):
-        code = self.get_argument('code')
-        t = oauth.request_access_token(code)
-        oauth.set_access_token(t.access_token, t.expires_in)
-        uid = oauth.get.account__get_uid().uid
-        info = oauth.get.users__show(uid=uid)
+        key, secret = self.get_secure_cookie('request_token').split(',')
+        self.clear_cookie('request_token')
 
-        self.set_secure_cookie('u', str(uid))
-        k = ','.join([t.access_token, str(t.expires_in)])
-        self.set_secure_cookie('accesskey', k)
+        verifier = self.get_argument('oauth_verifier')
+
+        oauth = OAuthHandler(APP_KEY, APP_SECRET)
+        oauth.set_request_token(key, secret)
+        token = oauth.get_access_token(verifier)
+
+        oauth.setToken(token.key, token.secret)
+        user = API(oauth).me()
+
+        self.set_secure_cookie('u', str(user.id))
+        self.set_secure_cookie('token', ','.join([token.key, token.secret]))
 
         self.redirect('/')
 
@@ -73,7 +76,7 @@ class HowtoHandler(BaseHandler):
     def get(self):
         uid = self.get_current_uid()
         if not uid:
-            self.redirect(self.get_login_url())
+            self.redirect_to_login()
             return
 
         row = self.db.get("""
@@ -91,7 +94,7 @@ class HowtoHandler(BaseHandler):
                                      'templates', 'howto.html')
         self.render(template_file, accesskey=key)
 
-class LogoutHandler(tornado.web.RequestHandler):
+class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_all_cookies()
         self.redirect('/')
@@ -102,9 +105,9 @@ class FrontPageHandler(BaseHandler):
         if u:
             template_file = os.path.join(os.path.dirname(__file__), 
                                          'templates', 'index.html')
-            self.render(template_file, **u)
+            self.render(template_file, uid=u.id, name=u.screen_name)
         else:
-            self.redirect(self.get_login_url())
+            self.redirect_to_login()
         
 class RpcHandler(BaseHandler):
     def get(self, name):
@@ -223,4 +226,3 @@ except:
     import wsgiref.simple_server
     httpd = wsgiref.simple_server.make_server('', 8080, app)
     httpd.serve_forever()
-
