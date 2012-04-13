@@ -58,6 +58,10 @@ a:hover {
   color: #C2C0C0;
 }
 
+#list {
+    min-height: 400px;
+}
+
 #edit {
   float: right;
   font-size:11px;
