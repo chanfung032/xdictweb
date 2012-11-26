@@ -149,8 +149,9 @@ class RpcHandler(BaseHandler):
 
     def _list(self, uid):
         words = self.db.query("""
-            select * from xd_wordlist s 
-            where s.weibo_uid = %s order by s.update_time desc, s.hits desc
+            select * from xd_wordlist s
+            where s.weibo_uid = %s and s.hits > 0
+            order by s.update_time desc, s.hits desc
         """, uid)
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
@@ -161,7 +162,9 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            delete from xd_wordlist where id = %s and weibo_uid = %s
+            update xd_wordlist
+            set hits = 0 - hits
+            where id = %s and weibo_uid = %s and hits > 0
         """, id, uid)
         self.send_response(0, "ok")
 
@@ -184,7 +187,7 @@ class RpcHandler(BaseHandler):
             """, uid, d['word'], d['meaning'], phonetic)
         else:
             self.db.execute("""
-                update xd_wordlist set hits = hits + 1 
+                update xd_wordlist set hits = abs(hits) + 1
                 where word = %s and weibo_uid = %s
             """, d['word'], uid)
         self.send_response(0, "ok")

@@ -14,7 +14,7 @@
     xdict.options = {};
 
     xdict.id = 0;
-    xdict.tab = -1;
+    xdict.tabid = -1;
     xdict.instanceId = -1;
 
     xdict.sanitize = function (word) {
@@ -47,13 +47,13 @@
     xdict.handleFetch = function (request, sender, sendResponse) {
         if (request.type == "fetch_raw" || request.type == "fetch_html") {
             
-            if (xdict.tab != -1 && xdict.instanceId != request.instanceId) {
-                chrome.tabs.sendRequest(xdict.tab.id, {
+            if (xdict.tabid != -1 && xdict.instanceId != request.instanceId) {
+                chrome.tabs.sendRequest(xdict.tabid, {
                     type: "hide",
                     instanceId: xdict.instanceId
                 });
             }
-            xdict.tab = sender.tab;
+            xdict.tabid = sender.tab.id;
             xdict.instanceId = request.instanceId;
 
             var word = xdict.sanitize(request.query),
