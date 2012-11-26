@@ -14,7 +14,7 @@
     xdict.options = {};
 
     xdict.id = 0;
-    xdict.tab = null;
+    xdict.tab = -1;
     xdict.instanceId = -1;
 
     xdict.sanitize = function (word) {
@@ -47,7 +47,7 @@
     xdict.handleFetch = function (request, sender, sendResponse) {
         if (request.type == "fetch_raw" || request.type == "fetch_html") {
             
-            if (xdict.tab != null && xdict.instanceId != request.instanceId) {
+            if (xdict.tab != -1 && xdict.instanceId != request.instanceId) {
                 chrome.tabs.sendRequest(xdict.tab.id, {
                     type: "hide",
                     instanceId: xdict.instanceId

@@ -26,6 +26,6 @@
    "manifest_version": 2,
    "name": "Google Dictionary (by Google)",
    "options_page": "options.html",
-   "permissions": [ "tabs", "https://clients5.google.com/*", "http://xdictweb.sinaapp.com/*" ],
+   "permissions": [ "tabs", "*://clients5.google.com/*", "http://xdictweb.sinaapp.com/*" ],
    "version": "3.0.15"
 }
