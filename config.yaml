@@ -1,4 +1,7 @@
----
 name: xdictweb
 version: 1
-...
+
+cron:
+- url: /cron/update
+  schedule: "0 5 * * *"
+  description: update word list

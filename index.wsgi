@@ -77,13 +77,13 @@ class HowtoHandler(BaseHandler):
             return
 
         row = self.db.get("""
-            select accesskey from xd_users where weibo_uid = %s
+            select accesskey from users where weibo_uid = %s
         """, uid)
         key = row.accesskey if row else None
         if not key:
             key = _build_accesskey()
             self.db.execute("""
-                insert into xd_users(weibo_uid, accesskey)
+                insert into users(weibo_uid, accesskey)
                 values(%s, %s)
             """, uid, key)
 
@@ -140,7 +140,7 @@ class RpcHandler(BaseHandler):
 
     def key_to_uid(self, key):
         row = self.db.get("""
-            select weibo_uid from xd_users where accesskey = %s
+            select weibo_uid from users where accesskey = %s
         """, key)
         return row.weibo_uid if row else None
 
@@ -149,7 +149,7 @@ class RpcHandler(BaseHandler):
 
     def _list(self, uid):
         words = self.db.query("""
-            select * from xd_wordlist s
+            select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.update_time desc, s.hits desc
         """, uid)
@@ -162,7 +162,7 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            update xd_wordlist
+            update wordlist
             set hits = 0 - hits
             where id = %s and weibo_uid = %s and hits > 0
         """, id, uid)
@@ -176,18 +176,18 @@ class RpcHandler(BaseHandler):
             return
 
         rc = self.db.get("""
-                select hits from xd_wordlist s 
+                select hits from wordlist s
                 where s.word = %s and weibo_uid = %s
             """, d['word'], uid)
         if rc is None:
             phonetic = self.get_phonetic(d['word'])
             self.db.execute("""
-                insert into xd_wordlist(weibo_uid,word,meaning,phonetic,hits)
+                insert into wordlist(weibo_uid,word,meaning,phonetic,hits)
                 values(%s, %s, %s, %s, 1)
             """, uid, d['word'], d['meaning'], phonetic)
         else:
             self.db.execute("""
-                update xd_wordlist set hits = abs(hits) + 1
+                update wordlist set hits = abs(hits)+1, recites = 0
                 where word = %s and weibo_uid = %s
             """, d['word'], uid)
         self.send_response(0, "ok")
@@ -205,6 +205,16 @@ class RpcHandler(BaseHandler):
         except:
             return ''
 
+class CronHandler(BaseHandler):
+    def get(self, job):
+        n = 0
+        for i, interval in enumerate((1, 2, 4, 8, 16)):
+            n += self.db.execute_rowcount("""
+                update wordlist set hits = abs(hits), recites = recites+1
+                where hits < 0 and recites = %s and update_time < now() - interval %s day;
+            """, i, interval)
+        self.write('%s word(s) updated' % n)
+
 settings = {
   "debug": True,
   "cookie_secret": "0xdeadbeef",
@@ -217,6 +227,7 @@ app = tornado.wsgi.WSGIApplication([
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
     (r"/howto", HowtoHandler),
+    (r"/cron/(.*)", CronHandler),
 ], **settings)
 
 try:
