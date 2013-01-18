@@ -74,23 +74,27 @@ window.initialize = function () {
     });
 };
 
-window.toggleMode = function (obj) {
+window.toggleMode = function () {
     EDITMODE = !EDITMODE;
     xdw.showEditColumn(EDITMODE);
-    obj.innerText = EDITMODE ? "背诵" : "编辑";
+    document.getElementById("edit").innerText = EDITMODE ? "背诵" : "编辑";
+};
+
+window.onKeyPress = function () {
+    event.keyCode == 101 && toggleMode()
 };
 
 })();
 
 </script>
 </head>
-<body onload="initialize()">
+<body onload="initialize()" onkeypress="onKeyPress()">
 <div id="container">
 
 <div style="padding-top:20px">
 <span id="title">{{ name }}的单词本</span>
 <span id="tip"></span>
-<a id="edit" href="javascript:void(0);" onclick="toggleMode(this);">编辑</a>
+<a id="edit" href="javascript:void(0);" onclick="toggleMode();">编辑</a>
 </div>
 
 <div id="head">
