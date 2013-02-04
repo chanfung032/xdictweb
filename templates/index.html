@@ -7,6 +7,7 @@
 <script type="text/javascript">
 
 var EDITMODE = false;
+var SHOWLIST = "list";
 
 (function () {
 
@@ -15,7 +16,7 @@ xdw.debug = true;
 
 xdw.fetchWordList = function (callback) {
     var xhr = new XMLHttpRequest;
-    xhr.open("GET", "/api/list", true);
+    xhr.open("GET", "/api/" + SHOWLIST, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) try {
             console.log(JSON.parse(xhr.responseText));
@@ -75,13 +76,16 @@ window.initialize = function () {
 };
 
 window.toggleMode = function () {
-    EDITMODE = !EDITMODE;
-    xdw.showEditColumn(EDITMODE);
-    document.getElementById("edit").innerText = EDITMODE ? "背诵" : "编辑";
+    if (SHOWLIST == 'list') {
+        EDITMODE = !EDITMODE;
+        xdw.showEditColumn(EDITMODE);
+        document.getElementById("edit").innerText = EDITMODE ? "背诵" : "编辑";
+    }
 };
 
 window.onKeyPress = function () {
-    event.keyCode == 101 && toggleMode()
+    event.keyCode == 101 /* e */ && toggleMode()
+    event.keyCode == 114 /* r */ && (SHOWLIST = (SHOWLIST == 'list' ? 'review' : 'list')) && window.initialize()
 };
 
 })();

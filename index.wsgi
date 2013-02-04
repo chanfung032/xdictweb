@@ -157,6 +157,16 @@ class RpcHandler(BaseHandler):
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)
 
+    def _review(self, uid):
+        words = self.db.query("""
+            select word, phonetic, meaning, abs(hits) as hits from wordlist s
+            where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
+        """, uid)
+        random.shuffle(words)
+        h = lambda o: o.isoformat() \
+                if isinstance(o, datetime.datetime) else None
+        self.send_response(0, words, h)
+
     def _delete(self, uid, id=None):
         if id is None:
             self.send_response(1, "invalid request")
