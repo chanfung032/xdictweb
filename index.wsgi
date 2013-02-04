@@ -151,7 +151,7 @@ class RpcHandler(BaseHandler):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
-            order by s.update_time desc, s.hits desc
+            order by s.update_time desc, s.hits desc, s.id
         """, uid)
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
@@ -211,7 +211,7 @@ class CronHandler(BaseHandler):
         for i, interval in enumerate((1, 2, 4, 8, 16)):
             n += self.db.execute_rowcount("""
                 update wordlist set hits = abs(hits), recites = recites+1
-                where hits < 0 and recites = %s and update_time < now() - interval %s day;
+                where hits < 0 and recites = %s and datediff(now(), update_time) = %s
             """, i, interval)
         self.write('%s word(s) updated' % n)
 
