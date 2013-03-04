@@ -161,8 +161,9 @@ class RpcHandler(BaseHandler):
         words = self.db.query("""
             select word, phonetic, meaning, abs(hits) as hits from wordlist s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
+            order by update_time desc
         """, uid)
-        random.shuffle(words)
+        #random.shuffle(words)
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)
