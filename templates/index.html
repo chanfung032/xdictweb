@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/static/main.css" type="text/css"/>
 <script type="text/javascript">
 
-var EDITMODE = false;
+// var EDITMODE = false;
 var SHOWLIST = "list";
 
 (function () {
@@ -69,22 +69,23 @@ window.initialize = function () {
         var e = document.getElementById("list");
         e.innerHTML = p; 
 
-        xdw.showEditColumn(EDITMODE);
+        xdw.showEditColumn(SHOWLIST == 'list');
 
         document.getElementById("tip").innerText = "共" + a.data.length + "个单词";
     });
 };
 
-window.toggleMode = function () {
-    if (SHOWLIST == 'list') {
-        EDITMODE = !EDITMODE;
-        xdw.showEditColumn(EDITMODE);
-        document.getElementById("edit").innerText = EDITMODE ? "背诵" : "编辑";
-    }
-};
+
+// window.toggleMode = function () {
+//     if (SHOWLIST == 'list') {
+//         EDITMODE = !EDITMODE;
+//         xdw.showEditColumn(EDITMODE);
+//         document.getElementById("edit").innerText = EDITMODE ? "背诵" : "编辑";
+//     }
+// };
 
 window.onKeyPress = function () {
-    event.keyCode == 101 /* e */ && toggleMode()
+    // event.keyCode == 101 /* e */ && toggleMode()
     event.keyCode == 114 /* r */ && (SHOWLIST = (SHOWLIST == 'list' ? 'review' : 'list')) && window.initialize()
 };
 
