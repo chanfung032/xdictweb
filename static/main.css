@@ -82,6 +82,10 @@ div.row {
   padding-bottom: 2px;
 }
 
+div.review {
+  background-color: #feeeed;
+}
+
 td.sn { width: 30px; }
 td.word { width: 120px; }
 td.phonetic { width: 100px; }

@@ -29,11 +29,27 @@ xdw.fetchWordList = function (callback) {
     xhr.send()
 };
 
-window.deleteThis = function (id) {
+window.deleteThis = function (id, obj) {
     var xhr = new XMLHttpRequest;
     xhr.open("GET", "/api/delete?id=" + id, true);
     xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) window.initialize()
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+            // WTF!
+            var seq = obj.parentNode.nextSibling.textContent;
+            var me = obj.parentNode.parentNode.parentNode.parentNode.parentNode;
+            var pa = me.parentNode;
+            pa.removeChild(me);
+
+            var nodes = pa.getElementsByClassName('sn');
+            for (var i = seq - 1; i < nodes.length; i++) {
+                nodes[i].textContent = nodes[i].textContent - 1;
+            }
+
+            document.getElementById("tip").innerText = "共" + nodes.length + "个单词";
+            //window.initialize()
+            }
+        }
     };
     xhr.send();
 };
@@ -57,10 +73,14 @@ window.initialize = function () {
         console.log(a);
 
         var p = '';
+        var is_normal = (SHOWLIST == 'list');
         for (var i = 0, l = a.data.length; i < l; i++) {
             var d = a.data[i];
-            p += '<div class="row"><table><tr>';
-            p += '<td class="icon"><a href="javascript:void(0);" onclick="deleteThis(' + d.id + ');"><img src="static/delete.png"></a></td>'
+            if (d.recites !== 0)
+                p += '<div class="row review"><table><tr>';
+            else
+                p += '<div class="row"><table><tr>';
+            p += '<td class="icon"><a href="javascript:void(0);" onclick="deleteThis(' + d.id + ',this);"><img src="static/delete.png"></a></td>'
             var phonetic = (d.phonetic && d.phonetic.length) ? '[' + d.phonetic + ']' : '';
             p += '<td class="sn">' + (i+1) + '</td><td class="word">' + d.word + '</td><td class="phonetic">' + phonetic + '</td><td class="meaning">' + d.meaning + '</td><td class="hits">' + d.hits + '</td>'; //<td>' + d.update_time.split(' ')[0] + '</td>';
             p += '</tr></table></div>';
@@ -69,7 +89,7 @@ window.initialize = function () {
         var e = document.getElementById("list");
         e.innerHTML = p; 
 
-        xdw.showEditColumn(SHOWLIST == 'list');
+        xdw.showEditColumn(is_normal);
 
         document.getElementById("tip").innerText = "共" + a.data.length + "个单词";
     });
@@ -86,7 +106,14 @@ window.initialize = function () {
 
 window.onKeyPress = function () {
     // event.keyCode == 101 /* e */ && toggleMode()
-    event.keyCode == 114 /* r */ && (SHOWLIST = (SHOWLIST == 'list' ? 'review' : 'list')) && window.initialize()
+    if (event.keyCode == 114 /* r */&& SHOWLIST != 'review') {
+        SHOWLIST = 'review';
+    } else if (event.keyCode == 115 /* s */&& SHOWLIST != 'sy') {
+        SHOWLIST = 'sy';
+    } else {
+        SHOWLIST = 'list';
+    }
+    window.initialize();
 };
 
 })();

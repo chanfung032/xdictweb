@@ -53,7 +53,7 @@
                     instanceId: xdict.instanceId
                 });
             }
-            xdict.tabid = sender.tab.id;
+            xdict.tabid = sender.tab && sender.tab.id || -1;
             xdict.instanceId = request.instanceId;
 
             var word = xdict.sanitize(request.query),
@@ -65,8 +65,8 @@
                     numResponses: 0,
                     callback: sendResponse
                 },
-                restrict = "pr,de";
-            request.type == "fetch_html" && (restrict = "pr,de,sy");
+                restrict = "pr,de,sy";
+            //request.type == "fetch_html" && (restrict = "pr,de,sy");
 
             google.language.define(word, xdict.options.language, xdict.options.language, 
                 function (a) {xdict.render(a, "dict", ctx);}, {restricts: restrict});
@@ -242,6 +242,7 @@
         } else {
             (d = xdict.summary(doc.webDefinitions)) && (d.type = "webDef");
         }
+        d.synonyms = doc.synonyms;
         return d
     };
 
@@ -285,7 +286,8 @@
         };       
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         
-        var o = {word: summary.prettyQuery.replace(/·/g, ""), meaning: summary.meaningText};
+        var o = {word: summary.prettyQuery.replace(/·/g, ""), meaning: summary.meaningText,
+                 synonyms: summary.synonyms};
         xhr.send(JSON.stringify(o));
     };
 
