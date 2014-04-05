@@ -100,12 +100,18 @@ class FrontPageHandler(BaseHandler):
     def get(self):
         u = self.current_user
         if u:
-            template_file = os.path.join(os.path.dirname(__file__), 
-                                         'templates', 'index.html')
-            self.render(template_file, **u)
+            user_agent = self.request.headers.get('User-Agent')
+            if user_agent.find('Android') != -1:
+                html_file = os.path.join(os.path.dirname(__file__),
+                                         'templates', 'wap.html')
+                self.write(open(html_file).read())
+            else:
+                template_file = os.path.join(os.path.dirname(__file__),
+                                             'templates', 'index.html')
+                self.render(template_file, **u)
         else:
             self.redirect(self.get_login_url())
-        
+
 class RpcHandler(BaseHandler):
     def get(self, name):
         uid = self.get_current_uid()
@@ -147,12 +153,13 @@ class RpcHandler(BaseHandler):
     def send_response(self, code, data, handler=None):
         self.write(json.dumps(dict(code=code, data=data), default=handler))
 
-    def _list(self, uid):
+    def _list(self, uid, start=0, limit=10000):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.update_time desc, s.hits desc, s.id
-        """, uid)
+            limit %s, %s
+        """, uid, int(start), int(limit))
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>背单词</title>
+<link rel="stylesheet" href="/static/jquery.mobile-1.4.2.min.css">
+<script src="/static/jquery.js"></script>
+<script src="/static/jquery.mobile-1.4.2.min.js"></script>
+<script>
+var start_pos = 0;
+$(document).on("pagecreate", "#main-page", function() {
+    //    <ul id="list" class="touch" data-role="listview" data-icon="false" data-split-icon="delete">
+    // Swipe to remove list item
+    $(document).on("swipeleft swiperight", "#list li", function(event) {
+        var listitem = $(this),
+        // These are the classnames used for the CSS transition
+        dir = event.type === "swipeleft" ? "left" : "right",
+        // Check if the browser supports the transform (3D) CSS transition
+        transition = $.support.cssTransform3d ? dir : false;
+
+        updateAndDelete(listitem, transition);
+    });
+
+    function updateAndDelete(listitem, transition) {
+        // Highlight the list item that will be removed
+        listitem.children(".ui-btn").addClass("ui-btn-active");
+        // Inject topic in confirmation popup after removing any previous injected topics
+        //listitem.find( ".topic" ).clone().insertAfter( "#question" );
+
+        // Remove with a transition
+        $.getJSON("/api/delete?id=" + listitem.attr('id'), function(data) {
+            if (transition) {
+                listitem
+                    // Add the class for the transition direction
+                    .addClass(transition)
+                    // When the transition is done...
+                    .on("webkitTransitionEnd transitionend otransitionend", function() {
+                        // ...the list item will be removed
+                        listitem.remove();
+                        // ...the list will be refreshed and the temporary class for border styling removed
+                        $("#list").listview("refresh").find(".border-bottom").removeClass("border-bottom");
+                    })
+
+                // During the transition the previous button gets bottom border
+                //.prev("li").children("a").addClass("border-bottom")
+                //    // Remove the highlight
+                //    .end().end().children(".ui-btn").removeClass("ui-btn-active");
+            }
+        });
+    }
+
+    function loadWords(start) {
+        $.getJSON("/api/list?limit=30&start=" + start_pos, function(data) {
+            var items = [];
+            $.each(data.data, function(key, val) {
+                items.push("<li id='" + val.id + "'><h3>" + val.word + "</h3><p>" + val.meaning + "</p></li>" );
+            });
+            $("ul").append(items.join(""));
+            $("ul").listview('refresh');
+        });
+    }
+
+    loadWords(start_pos);
+});
+</script>
+<style>
+.ui-listview > li p {
+    white-space:normal;
+}
+
+/* Left transition */
+li.left {
+    -webkit-transition: -webkit-transform 250ms ease;
+    -webkit-transform: translateX(-100%);
+    -moz-transition: -moz-transform 250ms ease;
+    -moz-transform: translateX(-100%);
+    -o-transition: -o-transform 250ms ease;
+    -o-transform: translateX(-100%);
+    transition: transform 250ms ease;
+    transform: translateX(-100%);
+}
+/* Right transition */
+li.right {
+    -webkit-transition: -webkit-transform 250ms ease;
+    -webkit-transform: translateX(100%);
+    -moz-transition: -moz-transform 250ms ease;
+    -moz-transform: translateX(100%);
+    -o-transition: -o-transform 250ms ease;
+    -o-transform: translateX(100%);
+    transition: transform 250ms ease;
+    transform: translateX(100%);
+}
+/* Border bottom for the previous button during the transition*/
+li.left a.ui-btn,
+li.right a.ui-btn {
+    border-top-width: 0;
+    border-left-width: 1px;
+    border-right-width: 1px;
+}
+li a.ui-btn.border-bottom {
+    border-bottom-width: 1px;
+}
+/* Hide the delete button on touch devices */
+ul.touch li.ui-li-has-alt a.delete {
+    display: none;
+}
+ul.touch li.ui-li-has-alt a.ui-btn {
+    margin-right:0;
+}
+</style>
+</head>
+
+<body>
+
+<div data-role="page" id="main-page" data-title="">
+
+    <div data-role="header" data-position="fixed" data-theme="b">
+        <h1>背单词</h1>
+        <a href="#demo-intro" data-rel="back" data-icon="arrow-r" data-iconpos="notext">Back</a>
+        <a href="#" onclick="window.location.reload()" data-icon="back" data-iconpos="notext">Refresh</a>
+    </div><!-- /header -->
+
+    <div role="main" class="ui-content">
+
+        <ul id="list" class="touch" data-role="listview" data-icon="false" data-split-icon="delete"></ul>
+
+    </div><!-- /content -->
+</div>
+</body>
+</html>
