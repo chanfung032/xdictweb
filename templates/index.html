@@ -32,6 +32,8 @@ xdw.fetchWordList = function (callback) {
 window.deleteThis = function (id, obj) {
     var xhr = new XMLHttpRequest;
     xhr.open("GET", "/api/delete?id=" + id, true);
+    xhr.timeout = 5000;
+    xhr.ontimeout = function () { console.log('timeout'); window.initialize(); }
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
@@ -107,13 +109,12 @@ window.initialize = function () {
 window.onKeyPress = function () {
     // event.keyCode == 101 /* e */ && toggleMode()
     if (event.keyCode == 114 /* r */&& SHOWLIST != 'review') {
-        SHOWLIST = 'review';
+        SHOWLIST = 'review'; window.initialize();
     } else if (event.keyCode == 115 /* s */&& SHOWLIST != 'sy') {
-        SHOWLIST = 'sy';
-    } else {
-        SHOWLIST = 'list';
+        SHOWLIST = 'sy'; window.initialize();
+    } else if (event.keyCode > 96 && event.keyCode < 123 && SHOWLIST != 'list') {
+        SHOWLIST = 'list'; window.initialize();
     }
-    window.initialize();
 };
 
 })();

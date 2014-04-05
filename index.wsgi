@@ -172,7 +172,6 @@ class RpcHandler(BaseHandler):
         words = self.db.query("""
             select word,phonetic,sy as meaning,abs(hits) as hits,recites from wordlist s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
-                  and sy <> ''
             order by update_time desc
         """, uid)
         #random.shuffle(words)
@@ -244,16 +243,20 @@ class CronHandler(BaseHandler):
     def get(self, job):
         n = self.db.execute_rowcount("""
             update wordlist set recites = recites - 1
-            where recites > 1 and hits > 0 and datediff(now(), update_time) > 2
+            where recites > 1 and hits > 0 and datediff(now(), update_time) > 7
         """)
         self.write('%s word(s) downgraded' % n)
 
+        import time
+        time.sleep(1)
+
         n = 0
-        for i, interval in enumerate([2**i for i in range(6)]):
+        for i in reversed(range(6)):
             n += self.db.execute_rowcount("""
                 update wordlist set hits = abs(hits), recites = recites+1
                 where hits < 0 and recites = %s and datediff(now(), update_time) = %s
-            """, i, interval)
+            """, i, 2**i)
+            time.sleep(1)
         self.write(', %s word(s) updated for review' % n)
 
 
