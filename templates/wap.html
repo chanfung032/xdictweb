@@ -54,7 +54,8 @@ $(document).on("pagecreate", "#main-page", function() {
         $.getJSON("/api/list?limit=30&start=" + start_pos, function(data) {
             var items = [];
             $.each(data.data, function(key, val) {
-                items.push("<li id='" + val.id + "'><h3>" + val.word + "</h3><p>" + val.meaning + "</p></li>" );
+                var phonetic = val.phonetic ? "[" + val.phonetic + "]&nbsp;" : "";
+                items.push("<li id='" + val.id + "'><h3>" + val.word + "</h3><p>" + phonetic + val.meaning + "</p></li>" );
             });
             $("ul").append(items.join(""));
             $("ul").listview('refresh');
