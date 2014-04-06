@@ -153,23 +153,34 @@ class RpcHandler(BaseHandler):
     def send_response(self, code, data, handler=None):
         self.write(json.dumps(dict(code=code, data=data), default=handler))
 
-    def _list(self, uid, start=0, limit=10000):
+    def _list(self, uid, start=None, limit=10000):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.update_time desc, s.hits desc, s.id
-            limit %s, %s
-        """, uid, int(start), int(limit))
+        """, uid)
+        if start:
+            start = int(start)
+            pos = len(words)
+            for i, v in enumerate(words):
+                if v['id'] == start:
+                    pos = i + 1
+                    break
+        else:
+            pos = 0
+        words = words[pos:pos+int(limit)]
+
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)
 
-    def _review(self, uid):
+    def _review(self, uid, start=0, limit=10000):
         words = self.db.query("""
             select word,phonetic,meaning,abs(hits) as hits,recites from wordlist s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
             order by update_time desc
-        """, uid)
+            limit %s, %s
+        """, uid, int(start), int(limit))
         #random.shuffle(words)
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None

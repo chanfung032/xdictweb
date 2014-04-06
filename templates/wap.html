@@ -8,7 +8,7 @@
 <script src="/static/jquery.js"></script>
 <script src="/static/jquery.mobile-1.4.2.min.js"></script>
 <script>
-var start_pos = 0;
+var start_pos = 0, api = 'list';
 $(document).on("pagecreate", "#main-page", function() {
     //    <ul id="list" class="touch" data-role="listview" data-icon="false" data-split-icon="delete">
     // Swipe to remove list item
@@ -19,14 +19,21 @@ $(document).on("pagecreate", "#main-page", function() {
         // Check if the browser supports the transform (3D) CSS transition
         transition = $.support.cssTransform3d ? dir : false;
 
+        if (api == 'review') return;
+
         updateAndDelete(listitem, transition);
+    });
+
+    $("#switch").on('click', function() {
+        api = (api == 'list') ? 'review' : 'list';
+        start_pos = 0;
+        $("#list").html("");
+        loadWords();
     });
 
     function updateAndDelete(listitem, transition) {
         // Highlight the list item that will be removed
         listitem.children(".ui-btn").addClass("ui-btn-active");
-        // Inject topic in confirmation popup after removing any previous injected topics
-        //listitem.find( ".topic" ).clone().insertAfter( "#question" );
 
         // Remove with a transition
         $.getJSON("/api/delete?id=" + listitem.attr('id'), function(data) {
@@ -50,10 +57,12 @@ $(document).on("pagecreate", "#main-page", function() {
         });
     }
 
-    function loadWords(start) {
-        $.getJSON("/api/list?limit=30&start=" + start_pos, function(data) {
+    function loadWords() {
+        var where = (api == 'list') ? ($("li").last().attr('id') || ''): start_pos;
+        $.getJSON("/api/" + api + "?limit=30&start=" + where, function(data) {
             var items = [];
             $.each(data.data, function(key, val) {
+                start_pos = start_pos + 1;
                 var phonetic = val.phonetic ? "[" + val.phonetic + "]&nbsp;" : "";
                 items.push("<li id='" + val.id + "'><h3>" + val.word + "</h3><p>" + phonetic + val.meaning + "</p></li>" );
             });
@@ -62,7 +71,14 @@ $(document).on("pagecreate", "#main-page", function() {
         });
     }
 
-    loadWords(start_pos);
+    loadWords();
+
+    $(document).on("scrollstop", function(){
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+            loadWords();
+        }
+    });
+
 });
 </script>
 <style>
@@ -118,8 +134,10 @@ ul.touch li.ui-li-has-alt a.ui-btn {
 
     <div data-role="header" data-position="fixed" data-theme="b">
         <h1>背单词</h1>
-        <a href="#demo-intro" data-rel="back" data-icon="arrow-r" data-iconpos="notext">Back</a>
+        <a href="#demo-intro" id="switch" data-icon="action" data-iconpos="notext">Back</a>
+        <!--
         <a href="#" onclick="window.location.reload()" data-icon="back" data-iconpos="notext">Refresh</a>
+        -->
     </div><!-- /header -->
 
     <div role="main" class="ui-content">
