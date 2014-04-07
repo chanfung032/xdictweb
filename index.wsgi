@@ -203,7 +203,7 @@ class RpcHandler(BaseHandler):
 
         self.db.execute("""
             update wordlist
-            set hits = 0 - hits
+            set hits = 0 - abs(hits)
             where id = %s and weibo_uid = %s and hits > 0
         """, id, uid)
         self.send_response(0, "ok")

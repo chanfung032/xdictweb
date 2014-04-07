@@ -74,7 +74,7 @@ $(document).on("pagecreate", "#main-page", function() {
     loadWords();
 
     $(document).on("scrollstop", function(){
-        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 200) {
             loadWords();
         }
     });
