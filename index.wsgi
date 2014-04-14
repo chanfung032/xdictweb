@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import string
 import random
 import datetime
@@ -101,7 +102,7 @@ class FrontPageHandler(BaseHandler):
         u = self.current_user
         if u:
             user_agent = self.request.headers.get('User-Agent')
-            if user_agent.find('Android') != -1:
+            if re.search('Android|iPhone', user_agent):
                 html_file = os.path.join(os.path.dirname(__file__),
                                          'templates', 'wap.html')
                 self.write(open(html_file).read())
