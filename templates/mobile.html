@@ -80,7 +80,7 @@ angular.module('myApp', [
         <div class='app-body'>
             <div class='app-content'>
                 <div class="scrollable">
-                    <div class="scrollable-content section" ui-swipe-left="next(0)">
+                    <div class="scrollable-content section" ng-click="next(0)" ui-swipe-left="next(0)">
                         <br/>
                         <div class="text-center"><h1>{{words[current].word}}</h1></div>
                         <br/>
