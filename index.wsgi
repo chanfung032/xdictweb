@@ -104,7 +104,7 @@ class FrontPageHandler(BaseHandler):
             user_agent = self.request.headers.get('User-Agent')
             if re.search('Android|iPhone', user_agent):
                 html_file = os.path.join(os.path.dirname(__file__),
-                                         'templates', 'wap.html')
+                                         'templates', 'mobile.html')
                 self.write(open(html_file).read())
             else:
                 template_file = os.path.join(os.path.dirname(__file__),
@@ -144,6 +144,11 @@ class RpcHandler(BaseHandler):
             getattr(self, '_' + name)(uid)
         except AttributeError:
             self.send_response(1, "unknown api")
+
+    def options(self, name):
+        self.set_header('Access-Control-Allow-Method', 'POST')
+        self.set_header('Access-Control-Allow-Headers', 'origin, content-type')
+        self.set_header('Access-Control-Allow-Origin', '*')
 
     def key_to_uid(self, key):
         row = self.db.get("""
@@ -210,6 +215,7 @@ class RpcHandler(BaseHandler):
         self.send_response(0, "ok")
 
     def _add(self, uid):
+        self.set_header('Access-Control-Allow-Origin', self.request.headers.get('origin'))
         def sy(d):
             x = []
             try:

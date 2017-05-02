@@ -10,10 +10,9 @@
 <div style="padding-top:20px">
 <span id="title">如何使用xdictweb单词本</span>
 <pre><code>
-1. 下载并安装<a href="http://xdictweb-dl.stor.sinaapp.com/xdict.crx">Xdictweb-For-Chrome</a>扩展。
-2. 打开扩展的Options页面，将 <b>{{ accesskey }} </b>贴到其中的 Accesskey的文本框中并保存。
-<center><img src="/static/where-to-paste.png"></img></center>
-3. 使用扩展查询单词，现在你所查询每个单词都会记录到xdictweb的数据库中，访问 http://xdictweb.sinaapp.com 开始背单词吧。
+1. 将链接<a id="bookmark" href="javascript:void((function(){var w = document.getElementsByClassName('vk_ans')[0].getElementsByTagName('span')[0].firstChild.data.replace(/·/g, ''); var m = document.querySelectorAll('.lr_dct_sf_sens')[0].getElementsByClassName('vk_txt')[0].firstChild.nextSibling.firstChild.firstChild.getElementsByTagName('span')[0].firstChild.data; var xhr=new XMLHttpRequest; xhr.open('POST', 'http://xdictweb.sinaapp.com/api/add?key={{ accesskey }}', true); xhr.onreadystatechange=function(){if (xhr.readyState == 4) document.getElementsByClassName('xpdbox')[0].style['background-color'] = 'lightgreen' }; xhr.send(JSON.stringify({'word': w, 'meaning': m}));})())">记住单词</a>加入到书签栏。
+2. 在https://www.google.com使用“define xxxx”这样的方式查询单词。
+3. 点击步骤1中保存的书签，单词就会记录到xdictweb的数据库中，访问http://xdictweb.sinaapp.com开始背单词吧。
 </pre></code>
 </div>
 </body>

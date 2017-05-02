@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>背单词</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <link rel="stylesheet" href="/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-hover.min.css" />
+    <link rel="stylesheet" href="/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-base.min.css" />
+    <script src="/static/bower_components/angular/angular.min.js"></script>
+    <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.min.js"></script>
+    <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.gestures.min.js"></script>
+
+    <script type="text/javascript">
+angular.module('myApp', [
+    'mobile-angular-ui',
+    'mobile-angular-ui.gestures'
+])
+.controller("XdictController", function($scope, $http) {
+    $scope.words = [];
+    $scope.current = 0;
+    $scope.showMeaning = 0;
+
+    $scope.forget = function() {
+        if ($scope.showMeaning) {
+            $scope.next(0);
+        } else {
+            $scope.showMeaning = 1;
+        }
+    };
+
+    $scope.next = function(markAsRememberd) {
+        if (markAsRememberd) {
+            $http.get("/api/delete?id=" + $scope.words[$scope.current].id).then(function(res) {
+                $scope._next();
+            });
+        } else {
+            $scope._next();
+        }
+    };
+
+    $scope._next = function() {
+        if ($scope.current >= $scope.words.length - 1) {
+            $http.get("/api/list?limit=50&start=").then(function(res) {
+                $scope.words = $scope.shuffle(res.data.data);
+                $scope.showMeaning = 0;
+                $scope.current = 0;
+            });
+        } else {
+            $scope.showMeaning = 0;
+            $scope.current += 1;
+        }
+	};
+
+	$scope.shuffle = function (a) {
+		var j, x, i;
+		for (i = a.length; i; i--) {
+			j = Math.floor(Math.random() * i);
+			x = a[i - 1];
+			a[i - 1] = a[j];
+			a[j] = x;
+		}
+        return a;
+    };
+
+    $scope.next(0);
+});
+    </script>
+  </head>
+  <body ng-app="myApp">
+    <div class="app" ng-controller="XdictController">
+        <div class="navbar navbar-app navbar-absolute-top">
+            <div class="navbar-brand navbar-brand-center">背单词</div>
+        </div>
+        <div class="navbar navbar-app navbar-absolute-bottom">
+            <div class="btn-group justified">
+                <a href="#" class="btn btn-navbar" ng-click="forget()"><i class="fa fa-navbar"></i> 不记得</a>
+                <a href="#" class="btn btn-navbar" ng-click="next(1)"><i class="fa fa-navbar"></i> 记得</a>
+            </div>
+        </div>
+        <div class='app-body'>
+            <div class='app-content'>
+                <div class="scrollable">
+                    <div class="scrollable-content section" ui-swipe-left="next(0)">
+                        <br/>
+                        <div class="text-center"><h1>{{words[current].word}}</h1></div>
+                        <br/>
+                        <div ng-if="showMeaning">
+                            <div class="text-center" ng-show="words[current].phonetic"><p>[{{words[current].phonetic}}]</p></div>
+                            <div class="text-center"><p>{{words[current].meaning}}</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
