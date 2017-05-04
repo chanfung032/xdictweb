@@ -246,9 +246,9 @@ class RpcHandler(BaseHandler):
             """, uid, d['word'], d['meaning'], phonetic, sy(d))
         else:
             self.db.execute("""
-                update wordlist set hits = abs(hits)+1, recites = 0
+                update wordlist set meaning = %s, hits = abs(hits)+1, recites = 0
                 where word = %s and weibo_uid = %s
-            """, d['word'], uid)
+            """, d['meaning'], d['word'], uid)
         self.send_response(0, "ok")
 
     def get_phonetic(self, word):
