@@ -29,12 +29,10 @@ angular.module('myApp', [
     };
 
     $scope.next = function(markAsRememberd) {
-        if (markAsRememberd) {
-            $http.get("/api/delete?id=" + $scope.words[$scope.current].id).then(function(res) {
-                $scope._next();
-            });
-        } else {
-            $scope._next();
+        var id = $scope.words.length ? $scope.words[$scope.current].id : -1;
+        $scope._next();
+        if (id != -1 && markAsRememberd) {
+            $http.get("/api/delete?id=" + id);
         }
     };
 
