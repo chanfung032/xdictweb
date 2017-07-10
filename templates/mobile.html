@@ -24,6 +24,10 @@ angular.module('myApp', [
         if ($scope.showMeaning) {
             $scope.next(0);
         } else {
+            var id = $scope.words.length ? $scope.words[$scope.current].id : -1;
+            if (id != -1) {
+                $http.get("/api/forget?id=" + id);
+            }
             $scope.showMeaning = 1;
         }
     };
