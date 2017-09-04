@@ -159,12 +159,16 @@ class RpcHandler(BaseHandler):
     def send_response(self, code, data, handler=None):
         self.write(json.dumps(dict(code=code, data=data), default=handler))
 
-    def _list(self, uid, start=None, limit=10000):
+    def _list(self, uid, start=None, limit=10000, fill_if_empty=False):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.update_time desc, s.hits desc, s.id
         """, uid)
+        if fill_if_empty and len(words) == 0:
+            words = self.db.query("""
+                SELECT * FROM wordlist where hits < 0 and recites >= 6 ORDER BY RAND() LIMIT %s
+            """, int(limit))
         if start:
             start = int(start)
             pos = len(words)
@@ -219,7 +223,7 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            update wordlist set recites = 0 where id = %s and weibo_uid = %s
+            update wordlist set hits = abs(hits), recites = 0 where id = %s and weibo_uid = %s
         """, id, uid)
         self.send_response(0, "ok")
 

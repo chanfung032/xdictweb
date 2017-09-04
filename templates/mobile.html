@@ -22,9 +22,9 @@ angular.module('myApp', [
 
     $scope.forget = function() {
         if ($scope.showMeaning) {
-            var id = $scope.words.length ? $scope.words[$scope.current].id : -1;
-            if (id != -1) {
-                $http.get("/api/forget?id=" + id);
+            var w = $scope.words.length ? $scope.words[$scope.current] : null;
+            if (w != null) {
+                $http.get("/api/forget?id=" + w.id);
             }
             $scope.next(0);
         } else {
@@ -33,16 +33,16 @@ angular.module('myApp', [
     };
 
     $scope.next = function(markAsRememberd) {
-        var id = $scope.words.length ? $scope.words[$scope.current].id : -1;
+        var w = $scope.words.length ? $scope.words[$scope.current] : null;
         $scope._next();
-        if (id != -1 && markAsRememberd) {
-            $http.get("/api/delete?id=" + id);
+        if (w != null && markAsRememberd && w.hits > 0) {
+            $http.get("/api/delete?id=" + w.id);
         }
     };
 
     $scope._next = function() {
         if ($scope.current >= $scope.words.length - 1) {
-            $http.get("/api/list?limit=50&start=").then(function(res) {
+            $http.get("/api/list?limit=50&start=&fill_if_empty=1").then(function(res) {
                 $scope.words = $scope.shuffle(res.data.data);
                 $scope.showMeaning = 0;
                 $scope.current = 0;
@@ -79,10 +79,10 @@ angular.module('myApp', [
                 <a href="#" class="btn btn-navbar" ng-click="next(1)"><i class="fa fa-navbar"></i> 记得</a>
             </div>
         </div>
-        <div class='app-body'>
+        <div class='app-body' >
             <div class='app-content'>
                 <div class="scrollable">
-                    <div class="scrollable-content section" ng-dblclick="forget()" ui-swipe-left="next(0)">
+                    <div class="scrollable-content section" ng-dblclick="forget()" ui-swipe-left="next(0)" ng-style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}">
                         <br/>
                         <div class="text-center"><h1>{{words[current].word}}</h1></div>
                         <br/>
