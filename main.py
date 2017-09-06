@@ -164,21 +164,12 @@ class RpcHandler(BaseHandler):
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.update_time desc, s.hits desc, s.id
-        """, uid)
+            limit %s
+        """, uid, int(limit))
         if fill_if_empty and len(words) == 0:
             words = self.db.query("""
                 SELECT * FROM wordlist where hits < 0 and recites >= 6 ORDER BY RAND() LIMIT %s
             """, int(limit))
-        if start:
-            start = int(start)
-            pos = len(words)
-            for i, v in enumerate(words):
-                if v['id'] == start:
-                    pos = i + 1
-                    break
-        else:
-            pos = 0
-        words = words[pos:pos+int(limit)]
 
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
