@@ -36,7 +36,7 @@ angular.module('myApp', [
         var w = $scope.words.length ? $scope.words[$scope.current] : null;
         $scope._next();
         if (w != null && markAsRememberd && w.hits > 0) {
-            $http.get("/api/delete?id=" + w.id);
+            $http.get("/api/ok?id=" + w.id);
         }
     };
 

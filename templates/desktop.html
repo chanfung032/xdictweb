@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>背单词</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.css" />
+	<link rel="stylesheet" href="/static/bower_components/angular-xeditable/dist/css/xeditable.css" />
+    <script src="/static/bower_components/angular/angular.min.js"></script>
+	<script src="/static/bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+    <script type="text/javascript">
+angular.module('myApp', [
+    'xeditable'
+])
+.run(function(editableOptions, editableThemes) {
+    editableThemes.bs3.inputClass = 'input-sm';
+    editableThemes.bs3.buttonsClass = 'btn-sm';
+    editableOptions.theme = 'bs3';
+})
+.controller("XdictController", function($scope, $http) {
+	$scope.go = function(api) {
+		$scope.api = api;
+		$http.get($scope.api).then(function(response) {
+			$scope.words = response.data.data;
+		});
+	};
+	$scope.go('/api/list');
+
+	$scope.add = function() {
+		$scope.inserted = {id: -1, word: '', phonetic: '', meaning: '', hits: 1};
+		$scope.words.unshift($scope.inserted);
+	};
+
+    $scope.update = function(data, id) {
+        return $http.post('/api/update', {id: id, word: data.word, meaning: data.meaning, phonetic: data.phonetic});
+    }
+
+    $scope.delete = function(id) {
+        if (!confirm("确认要删除？")) return;
+
+        $http.get('/api/delete?id=' + id).then(function(response) {
+            var xv = function(a, f) { var i = a.findIndex(f); if (i != -1) a.splice(i, 1) };
+			xv($scope.words, function(e) { return e.id == id });
+        });
+    };
+})
+    </script>
+    <style type="text/css">
+form[editable-form] > div {margin: 10px 0;}
+.editable-wrap {
+    width: 100%;
+}
+    </style>
+  </head>
+  <body ng-app="myApp">
+    <div class="container" ng-controller="XdictController">
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">背单词</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li ng-class="{active: api == '/api/list'}"><a href="#" ng-click="go('/api/list')">待背</a></li>
+              <li ng-class="{active: api == '/api/review'}"><a href="#" ng-click="go('/api/review')">复习</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div id="content">
+		<div>
+ 		  <button class="btn btn-default" ng-click="add()"><span class="glyphicon glyphicon-plus"></span> 新增</button> 
+		  <span class="pull-right text-muted">共 {{words.length}} 个单词</span>
+		</div>
+        <table class="table table-condensed">
+          <thead class="thead-default">
+            <tr>
+              <td class="word">单词</td>
+              <td class="phonetic">音标</td>
+              <td class="meaning">词义</td>
+              <td class="hits">Hits</td>
+              <td class="sn"></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="w in words" ng-style="{'background-color': w.recites == 0 ? 'white' : 'lavenderblush'}">
+			  <td><span editable-text="w.word" e-name="word" e-form="rowform">{{w.word}}</span></td>
+			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform">{{w.phonetic}}</span></td>
+			  <td><span editable-text="w.meaning" e-name="meaning" e-form="rowform">{{w.meaning}}</span></td>
+              <td class="hits">{{w.hits}}</td>
+              <td class="sn" style="white-space: nowrap">
+				  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
+					  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span></button>
+					  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
+				  </form>
+				  <div ng-show="!rowform.$visible">
+					  <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>
+					  <button class="btn btn-default btn-sm" ng-click="delete(w.id)"><span class="glyphicon glyphicon-trash"></span></button>
+				  </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

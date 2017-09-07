@@ -108,8 +108,8 @@ class FrontPageHandler(BaseHandler):
                 self.write(open(html_file).read())
             else:
                 template_file = os.path.join(os.path.dirname(__file__),
-                                             'templates', 'index.html')
-                self.render(template_file, **u)
+                                             'templates', 'desktop.html')
+                self.write(open(template_file).read())
         else:
             self.redirect(self.get_login_url())
 
@@ -133,7 +133,18 @@ class RpcHandler(BaseHandler):
     def post(self, name):
         k = self.get_argument('key', None)
         if not k:
-            self.send_error(403)
+            uid = self.get_current_uid()
+            if not uid:
+                self.send_error(403)
+                return
+
+            params = json.loads(self.request.body.decode('utf-8'))
+            print 'params', params
+            try:
+                getattr(self, '_' + name)(uid, **params)
+            except AttributeError:
+                self.send_response(1, "unknown api")
+            return
 
         uid = self.key_to_uid(k)
         if not uid:
@@ -199,6 +210,27 @@ class RpcHandler(BaseHandler):
         self.send_response(0, words, h)
 
     def _delete(self, uid, id=None):
+        if id is None:
+            self.send_response(1, "invalid request")
+        self.db.execute("""
+            delete from wordlist where id = %s and weibo_uid = %s
+        """, id, uid)
+        self.send_response(0, "ok")
+
+    def _update(self, uid, word, **kws):
+        if kws.get('id', -1) != -1:
+            self.db.execute('''
+                update wordlist set word=%s, phonetic=%s, meaning=%s where id=%s
+            ''', word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('id'))
+        else:
+            self.db.execute('''
+                insert into wordlist(weibo_uid, word, phonetic, meaning, sy, rel, hits, recites)
+                values(%s, %s, %s, %s, '', '', 1, 0)
+                on duplicate key update phonetic=%s, meaning=%s
+            ''', uid, word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('phonetic', ''), kws.get('meaning', ''))
+        self.send_response(0, "ok")
+
+    def _ok(self, uid, id=None):
         if id is None:
             self.send_response(1, "invalid request")
 
