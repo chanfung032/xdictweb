@@ -92,7 +92,7 @@ form[editable-form] > div {margin: 10px 0;}
           <tbody>
             <tr ng-repeat="w in words" ng-style="{'background-color': w.recites == 0 ? 'white' : 'lavenderblush'}">
 			  <td><span editable-text="w.word" e-name="word" e-form="rowform">{{w.word}}</span></td>
-			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform">{{w.phonetic}}</span></td>
+			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform">{{w.phonetic ? '['+w.phonetic+ ']' : ''}}</span></td>
 			  <td><span editable-text="w.meaning" e-name="meaning" e-form="rowform">{{w.meaning}}</span></td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn" style="white-space: nowrap">
