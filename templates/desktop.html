@@ -31,6 +31,12 @@ angular.module('myApp', [
 		$scope.words.unshift($scope.inserted);
 	};
 
+    $scope.keypress = function(e, form) {
+        if (e.which == 13) {
+            form.$submit();
+        }
+    }
+
     $scope.update = function(data, id) {
         return $http.post('/api/update', {id: id, word: data.word, meaning: data.meaning, phonetic: data.phonetic});
     }
@@ -91,9 +97,9 @@ form[editable-form] > div {margin: 10px 0;}
           </thead>
           <tbody>
             <tr ng-repeat="w in words" ng-style="{'background-color': w.recites == 0 ? 'white' : 'lavenderblush'}">
-			  <td><span editable-text="w.word" e-name="word" e-form="rowform">{{w.word}}</span></td>
-			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform">{{w.phonetic ? '['+w.phonetic+ ']' : ''}}</span></td>
-			  <td><span editable-text="w.meaning" e-name="meaning" e-form="rowform">{{w.meaning}}</span></td>
+			  <td><span editable-text="w.word" e-name="word" e-form="rowform" e-required e-ng-keypress="keypress($event, rowform)">{{w.word}}</span></td>
+			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform" e-ng-keypress="keypress($event, rowform)">{{w.phonetic ? '['+w.phonetic+ ']' : ''}}</span></td>
+			  <td><span editable-text="w.meaning" e-name="meaning" e-form="rowform" e-ng-keypress="keypress($event, rowform)">{{w.meaning}}</span></td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn" style="white-space: nowrap">
 				  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
