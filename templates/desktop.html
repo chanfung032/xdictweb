@@ -31,6 +31,13 @@ angular.module('myApp', [
 		$scope.words.unshift($scope.inserted);
 	};
 
+    $scope.cancel = function(form, i) {
+        if (i == 0 && $scope.words[i].id == -1) {
+            $scope.words.splice(i, 1);
+        }
+        form.$cancel();
+    }
+
     $scope.keypress = function(e, form) {
         if (e.which == 13) {
             form.$submit();
@@ -104,7 +111,7 @@ form[editable-form] > div {margin: 10px 0;}
               <td class="sn" style="white-space: nowrap">
 				  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
 					  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span></button>
-					  <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
+					  <button type="button" ng-disabled="rowform.$waiting" ng-click="cancel(rowform, $index)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
 				  </form>
 				  <div ng-show="!rowform.$visible">
 					  <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>

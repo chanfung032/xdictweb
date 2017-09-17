@@ -218,17 +218,18 @@ class RpcHandler(BaseHandler):
         self.send_response(0, "ok")
 
     def _update(self, uid, word, **kws):
-        if kws.get('id', -1) != -1:
+        id_ = kws.get('id', -1)
+        if id_ != -1:
             self.db.execute('''
                 update wordlist set word=%s, phonetic=%s, meaning=%s where id=%s
             ''', word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('id'))
         else:
-            self.db.execute('''
+            id_ = self.db.execute_lastrowid('''
                 insert into wordlist(weibo_uid, word, phonetic, meaning, sy, rel, hits, recites)
                 values(%s, %s, %s, %s, '', '', 1, 0)
                 on duplicate key update phonetic=%s, meaning=%s
             ''', uid, word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('phonetic', ''), kws.get('meaning', ''))
-        self.send_response(0, "ok")
+        self.send_response(0, id_)
 
     def _ok(self, uid, id=None):
         if id is None:
