@@ -209,6 +209,14 @@ class RpcHandler(BaseHandler):
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)
 
+    def _like(self, uid, word):
+        words = self.db.query("""
+            select * from wordlist where word sounds like %s and word <> %s
+        """, word, word)
+        h = lambda o: o.isoformat() \
+                if isinstance(o, datetime.datetime) else None
+        self.send_response(0, words, h)
+
     def _delete(self, uid, id=None):
         if id is None:
             self.send_response(1, "invalid request")
