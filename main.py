@@ -235,7 +235,7 @@ class RpcHandler(BaseHandler):
             id_ = self.db.execute_lastrowid('''
                 insert into wordlist(weibo_uid, word, phonetic, meaning, sy, rel, hits, recites)
                 values(%s, %s, %s, %s, '', '', 1, 0)
-                on duplicate key update phonetic=%s, meaning=%s
+                on duplicate key update phonetic=%s, meaning=%s, hits=abs(hits)+1, recites=0
             ''', uid, word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('phonetic', ''), kws.get('meaning', ''))
         self.send_response(0, id_)
 
