@@ -188,7 +188,7 @@ class RpcHandler(BaseHandler):
 
     def _review(self, uid, start=0, limit=10000):
         words = self.db.query("""
-            select word,phonetic,meaning,abs(hits) as hits,recites from wordlist s
+            select id,word,phonetic,meaning,abs(hits) as hits,recites from wordlist s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
             order by update_time desc
             limit %s, %s
