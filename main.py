@@ -178,9 +178,12 @@ class RpcHandler(BaseHandler):
             limit %s
         """, uid, int(limit))
         if fill_if_empty and len(words) == 0:
+            r = self.db.get('''
+                select min(recites) as r from wordlist where recites >= 6
+            ''').r
             words = self.db.query("""
-                SELECT * FROM wordlist where hits < 0 and recites >= 6 ORDER BY RAND() LIMIT %s
-            """, int(limit))
+                SELECT * FROM wordlist where hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
+            """, r, int(limit))
 
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
@@ -245,8 +248,8 @@ class RpcHandler(BaseHandler):
 
         self.db.execute("""
             update wordlist
-            set hits = 0 - abs(hits)
-            where id = %s and weibo_uid = %s and hits > 0
+            set hits = 0 - abs(hits), recites = recites + if(recites < 6, 0, 1)
+            where id = %s and weibo_uid = %s
         """, id, uid)
         self.send_response(0, "ok")
 
