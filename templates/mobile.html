@@ -34,10 +34,10 @@ angular.module('myApp', [
 
     $scope.next = function(markAsRememberd) {
         var w = $scope.words.length ? $scope.words[$scope.current] : null;
-        $scope._next();
         if (w != null && markAsRememberd) {
             $http.get("/api/ok?id=" + w.id);
         }
+        $scope._next();
     };
 
     $scope._next = function() {
