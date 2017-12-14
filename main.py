@@ -262,6 +262,14 @@ class RpcHandler(BaseHandler):
         """, id, uid)
         self.send_response(0, "ok")
 
+    def _info(self, uid):
+        if id is None:
+            self.send_response(1, "invalid request")
+        info = self.db.query('''
+            select recites, count(1) as count from wordlist where weibo_uid = %s group by recites
+        ''', uid)
+        self.send_response(0, info)
+
     def _add(self, uid):
         self.set_header('Access-Control-Allow-Origin', self.request.headers.get('origin'))
         def sy(d):
