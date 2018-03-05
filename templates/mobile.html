@@ -9,11 +9,13 @@
     <script src="/static/bower_components/angular/angular.min.js"></script>
     <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.min.js"></script>
     <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.gestures.min.js"></script>
+    <script src="static/bower_components/ios-dblclick/ios-dblclick.js"></script>
 
     <script type="text/javascript">
 angular.module('myApp', [
     'mobile-angular-ui',
-    'mobile-angular-ui.gestures'
+    'mobile-angular-ui.gestures',
+    'iosDblclick'
 ])
 .controller("XdictController", function($scope, $http) {
     $scope.words = [];
@@ -82,7 +84,7 @@ angular.module('myApp', [
         <div class='app-body' >
             <div class='app-content'>
                 <div class="scrollable">
-                    <div class="scrollable-content section" ng-dblclick="forget()" ui-swipe-left="next(0)" ng-style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}">
+                    <div class="scrollable-content section" ios-dblclick="forget()" ui-swipe-left="next(0)" ng-style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}">
                         <br/>
                         <div class="text-center"><h1>{{words[current].word}}</h1></div>
                         <br/>

@@ -19,6 +19,7 @@
     "angular": "~1.6.4",
     "angular-bootstrap": "~2.5.0",
     "bootstrap": "~3.3.7",
-    "angular-xeditable": "~0.8.0"
+    "angular-xeditable": "~0.8.0",
+    "ios-dblclick": "~0.1.0"
   }
 }
