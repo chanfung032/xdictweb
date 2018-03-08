@@ -174,7 +174,7 @@ class RpcHandler(BaseHandler):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
-            order by s.update_time desc, s.hits desc, s.id
+            order by s.updated_at desc, s.hits desc, s.id
             limit %s
         """, uid, int(limit))
         if fill_if_empty and len(words) == 0:
@@ -192,8 +192,8 @@ class RpcHandler(BaseHandler):
     def _review(self, uid, start=0, limit=10000):
         words = self.db.query("""
             select id,word,phonetic,meaning,abs(hits) as hits,recites from wordlist s
-            where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
-            order by update_time desc
+            where s.weibo_uid = %s and s.hits < 0 and datediff(now(), updated_at) = 0
+            order by updated_at desc
             limit %s, %s
         """, uid, int(start), int(limit))
         #random.shuffle(words)
@@ -204,8 +204,8 @@ class RpcHandler(BaseHandler):
     def _sy(self, uid):
         words = self.db.query("""
             select word,phonetic,sy as meaning,abs(hits) as hits,recites from wordlist s
-            where s.weibo_uid = %s and s.hits < 0 and datediff(now(), update_time) = 0
-            order by update_time desc
+            where s.weibo_uid = %s and s.hits < 0 and datediff(now(), updated_at) = 0
+            order by updated_at desc
         """, uid)
         #random.shuffle(words)
         h = lambda o: o.isoformat() \
@@ -325,7 +325,7 @@ class CronHandler(BaseHandler):
     def get(self, job):
         n = self.db.execute_rowcount("""
             update wordlist set recites = recites - 1
-            where recites > 1 and hits > 0 and datediff(now(), update_time) > 7
+            where recites > 1 and hits > 0 and datediff(now(), updated_at) > 7
         """)
         self.write('%s word(s) downgraded' % n)
 
@@ -336,7 +336,7 @@ class CronHandler(BaseHandler):
         for i in reversed(range(6)):
             n += self.db.execute_rowcount("""
                 update wordlist set hits = abs(hits), recites = recites+1
-                where hits < 0 and recites = %s and datediff(now(), update_time) = %s
+                where hits < 0 and recites = %s and datediff(now(), updated_at) = %s
             """, i, 2**i)
             time.sleep(1)
         self.write(', %s word(s) updated for review' % n)

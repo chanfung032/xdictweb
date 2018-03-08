@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS `wordlist` (
   `meaning` varchar(256) NOT NULL,
   `hits` int(11) NOT NULL COMMENT '查询次数',
   `recites` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '记诵次数',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `weibo_uid` (`weibo_uid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=588 ;
