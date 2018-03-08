@@ -289,6 +289,7 @@ class RpcHandler(BaseHandler):
         except:
             self.send_response(1, "invalid request")
             return
+        d = {k: re.sub(r'\s+', ' ', v.strip()) if type(v) == unicode else v for k, v in d.iteritems()}
 
         rc = self.db.get("""
                 select hits from wordlist s
