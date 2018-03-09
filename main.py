@@ -18,6 +18,12 @@ from sae.const import (MYSQL_HOST, MYSQL_HOST_S,
     MYSQL_PORT, MYSQL_USER, MYSQL_PASS, MYSQL_DB
 )
 
+_orig_reconnect = tornado.database.Connection.reconnect
+def _reconnect(self):
+    self._db_args['init_command'] = 'SET time_zone = "+8:00"'
+    return _orig_reconnect(self)
+tornado.database.Connection.reconnect = _reconnect
+
 APP_KEY = '2426835332'
 APP_SECRET = '594f4a061b1a481ce4e030fbd88681f9'
 
