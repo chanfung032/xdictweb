@@ -18,6 +18,8 @@ from sae.const import (MYSQL_HOST, MYSQL_HOST_S,
     MYSQL_PORT, MYSQL_USER, MYSQL_PASS, MYSQL_DB
 )
 
+# `tornado.database` set timezone to +0:00, change it back
+# See: https://github.com/tornadoweb/tornado/blob/branch2.1/tornado/database.py#L50
 _orig_reconnect = tornado.database.Connection.reconnect
 def _reconnect(self):
     self._db_args['init_command'] = 'SET time_zone = "+8:00"'
