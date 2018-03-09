@@ -336,7 +336,7 @@ class CronHandler(BaseHandler):
         for i in reversed(range(6)):
             n += self.db.execute_rowcount("""
                 update wordlist set hits = abs(hits), recites = recites+1
-                where hits < 0 and recites = %s and datediff(now(), updated_at) = %s
+                where hits < 0 and recites = %s and datediff(now(), updated_at) % 33 = %s
             """, i, 2**i)
             time.sleep(1)
         self.write(', %s word(s) updated for review' % n)
