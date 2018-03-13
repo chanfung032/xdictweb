@@ -21,7 +21,7 @@ angular.module('myApp', [
 	$scope.go = function(api) {
 		$scope.api = api;
 		$http.get($scope.api).then(function(response) {
-			$scope.words = response.data.data;
+			$scope.words = response.data;
 		});
 	};
 	$scope.go('/api/list');
@@ -59,8 +59,8 @@ angular.module('myApp', [
 
     $scope.info = function() {
         $http.get('/api/info').then(function(response) {
-            var total = response.data.data.map(function(e) {return e.count}).reduce(function(x, y) {return x+y;});
-            var detail = response.data.data.map(function(e) {return e.recites + " | " + e.count}).join("\n");
+            var total = response.data.map(function(e) {return e.count}).reduce(function(x, y) {return x+y;});
+            var detail = response.data.map(function(e) {return e.recites + " | " + e.count}).join("\n");
             alert("total: " + total + "\n=======\n" + detail);
         });
     }

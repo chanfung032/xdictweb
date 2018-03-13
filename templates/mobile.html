@@ -44,8 +44,8 @@ angular.module('myApp', [
 
     $scope._next = function() {
         if ($scope.current >= $scope.words.length - 1) {
-            $http.get("/api/list?limit=50&start=&fill_if_empty=1").then(function(res) {
-                $scope.words = $scope.shuffle(res.data.data);
+            $http.get("/api/list?limit=50&start=&fill=1").then(function(res) {
+                $scope.words = $scope.shuffle(res.data);
                 $scope.showMeaning = 0;
                 $scope.current = 0;
             });

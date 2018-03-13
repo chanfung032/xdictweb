@@ -176,16 +176,20 @@ class RpcHandler(BaseHandler):
         return row.weibo_uid if row else None
 
     def send_response(self, code, data, handler=None):
-        self.write(json.dumps(dict(code=code, data=data), default=handler))
+        if code != 0:
+            self.set_status(500)
+            self.write(json.dumps({"error": data}))
+        else:
+            self.write(json.dumps(data, default=handler))
 
-    def _list(self, uid, start=None, limit=10000, fill_if_empty=False):
+    def _list(self, uid, start=None, limit=10000, fill=False):
         words = self.db.query("""
             select * from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.updated_at desc, s.hits desc, s.id
             limit %s
         """, uid, int(limit))
-        if fill_if_empty and len(words) == 0:
+        if fill and len(words) == 0:
             r = self.db.get('''
                 select min(recites) as r from wordlist where recites >= 6 and weibo_uid = %s
             ''', uid).r
@@ -234,7 +238,6 @@ class RpcHandler(BaseHandler):
         self.db.execute("""
             delete from wordlist where id = %s and weibo_uid = %s
         """, id, uid)
-        self.send_response(0, "ok")
 
     def _update(self, uid, word, **kws):
         id_ = kws.get('id', -1)
@@ -259,7 +262,6 @@ class RpcHandler(BaseHandler):
             set hits = 0 - abs(hits), recites = recites + if(recites < 6, 0, 1)
             where id = %s and weibo_uid = %s
         """, id, uid)
-        self.send_response(0, "ok")
 
     def _forget(self, uid, id=None):
         if id is None:
@@ -268,7 +270,6 @@ class RpcHandler(BaseHandler):
         self.db.execute("""
             update wordlist set hits = abs(hits), recites = 0 where id = %s and weibo_uid = %s
         """, id, uid)
-        self.send_response(0, "ok")
 
     def _info(self, uid):
         if id is None:
