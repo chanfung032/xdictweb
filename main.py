@@ -184,7 +184,7 @@ class RpcHandler(BaseHandler):
 
     def _list(self, uid, start=None, limit=10000, fill=False):
         words = self.db.query("""
-            select * from wordlist s
+            select id, word, phonetic, meaning, hits, recites from wordlist s
             where s.weibo_uid = %s and s.hits > 0
             order by s.updated_at desc, s.hits desc, s.id
             limit %s
@@ -194,7 +194,7 @@ class RpcHandler(BaseHandler):
                 select min(recites) as r from wordlist where recites >= 6 and weibo_uid = %s
             ''', uid).r
             words = self.db.query("""
-                SELECT * FROM wordlist where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
+                SELECT id, word, phonetic, meaning, hits, recites FROM wordlist where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
             """, uid, r, int(limit))
 
         h = lambda o: o.isoformat() \
