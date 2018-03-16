@@ -268,7 +268,11 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            update wordlist set hits = abs(hits), recites = 0 where id = %s and weibo_uid = %s
+            update wordlist set
+                hits = abs(hits),
+                difficulty = difficulty + if(recites > 0 and datediff(now(), updated_at) > 0, 1, 0),
+                recites = 0
+            where id = %s and weibo_uid = %s
         """, id, uid)
 
     def _info(self, uid):
