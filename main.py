@@ -270,7 +270,7 @@ class RpcHandler(BaseHandler):
         self.db.execute("""
             update wordlist set
                 hits = abs(hits),
-                difficulty = difficulty + if(recites > 0 and datediff(now(), updated_at) > 0, 1, 0),
+                difficulty = difficulty + if(recites >= 6 and datediff(now(), updated_at) > 0, 1, 0),
                 recites = 0
             where id = %s and weibo_uid = %s
         """, id, uid)
