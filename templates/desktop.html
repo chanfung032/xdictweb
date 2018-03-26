@@ -59,9 +59,17 @@ angular.module('myApp', [
 
     $scope.info = function() {
         $http.get('/api/info').then(function(response) {
-            var total = response.data.map(function(e) {return e.count}).reduce(function(x, y) {return x+y;});
+            var total = 0;
+            var total_r = 0;
+            for (var i = 0; i < response.data.length; i++) {
+                var e = response.data[i];
+                total += e.count;
+                if (e.recites >= 6) {
+                    total_r += e.count;
+                }
+            }
             var detail = response.data.map(function(e) {return e.recites + " | " + e.count}).join("\n");
-            alert("total: " + total + "\n=======\n" + detail);
+            alert(detail + "\n==========\n" + "总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r));
         });
     }
 })
