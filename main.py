@@ -281,7 +281,10 @@ class RpcHandler(BaseHandler):
         info = self.db.query('''
             select recites, count(1) as count from wordlist where weibo_uid = %s group by recites
         ''', uid)
-        self.send_response(0, info)
+        new = self.db.get('''
+            select count(1) as count from wordlist where weibo_uid = %s and datediff(now(), created_at) = 0
+        ''', uid)['count']
+        self.send_response(0, {"new": new, "r2c": info})
 
     def _add(self, uid):
         self.set_header('Access-Control-Allow-Origin', self.request.headers.get('origin'))

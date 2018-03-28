@@ -61,15 +61,15 @@ angular.module('myApp', [
         $http.get('/api/info').then(function(response) {
             var total = 0;
             var total_r = 0;
-            for (var i = 0; i < response.data.length; i++) {
-                var e = response.data[i];
+            for (var i = 0; i < response.data.r2c.length; i++) {
+                var e = response.data.r2c[i];
                 total += e.count;
                 if (e.recites >= 6) {
                     total_r += e.count;
                 }
             }
-            var detail = response.data.map(function(e) {return e.recites + " | " + e.count}).join("\n");
-            alert(detail + "\n==========\n" + "总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r));
+            var detail = response.data.r2c.map(function(e) {return e.recites + " | " + e.count}).join("\n");
+            alert(detail + "\n==========\n" + "总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new);
         });
     }
 })
