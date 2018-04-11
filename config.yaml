@@ -5,4 +5,3 @@ cron:
 - url: /cron/update
   schedule: "5 0 * * *"
   timezone: "Asia/Shanghai"
-  description: update word list
