@@ -9,6 +9,8 @@ import datetime
 import urllib
 import urllib2
 import xml.dom.minidom
+import base64
+import imghdr
 import weibo
 import tornado.web
 import tornado.wsgi
@@ -184,7 +186,8 @@ class RpcHandler(BaseHandler):
 
     def _list(self, uid, start=None, limit=10000, fill=False):
         words = self.db.query("""
-            select id, word, phonetic, meaning, hits, recites from words s
+            select id, word, phonetic, meaning, hits, recites, img is not null as img
+            from words s left join word_imgs on s.id = word_imgs.word_id
             where s.weibo_uid = %s and s.hits > 0
             order by s.updated_at desc, s.hits desc, s.id
             limit %s
@@ -194,7 +197,9 @@ class RpcHandler(BaseHandler):
                 select min(recites) as r from words where recites >= 6 and weibo_uid = %s
             ''', uid).r
             words = self.db.query("""
-                SELECT id, word, phonetic, meaning, hits, recites FROM words where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
+                SELECT id, word, phonetic, meaning, hits, recites, img is not null as img
+                FROM words left join word_imgs on words.id = word_imgs.word_id
+                where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
             """, uid, r, int(limit))
 
         h = lambda o: o.isoformat() \
@@ -203,7 +208,8 @@ class RpcHandler(BaseHandler):
 
     def _review(self, uid, start=0, limit=10000):
         words = self.db.query("""
-            select id,word,phonetic,meaning,abs(hits) as hits,recites from words s
+            select id,word,phonetic,meaning,abs(hits) as hits,recites, img is not null as img
+            from words s left join word_imgs on s.id = word_imgs.word_id
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), updated_at) = 0
             order by updated_at desc
             limit %s, %s
@@ -235,6 +241,7 @@ class RpcHandler(BaseHandler):
     def _delete(self, uid, id=None):
         if id is None:
             self.send_response(1, "invalid request")
+        self.db.execute("delete from word_imgs where word_id = %s", id)
         self.db.execute("""
             delete from words where id = %s and weibo_uid = %s
         """, id, uid)
@@ -252,6 +259,19 @@ class RpcHandler(BaseHandler):
                 on duplicate key update phonetic=%s, meaning=%s, hits=abs(hits), recites=0
             ''', uid, word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('phonetic', ''), kws.get('meaning', ''))
         self.send_response(0, id_)
+
+    def _upload(self, uid, id, url):
+        if url == '':
+            self.db.execute('delete from word_imgs where word_id = %s', id)
+            return
+
+        if url.startswith('http'):
+            img = urllib2.urlopen(url, timeout=30).read()
+        else:
+            img = base64.b64decode(url.split(',')[-1])
+        self.db.execute('''
+            insert into word_imgs(word_id, img) values(%s, %s) on duplicate key update img=values(img)
+        ''', id, img)
 
     def _ok(self, uid, id=None):
         if id is None:
@@ -337,6 +357,14 @@ class RpcHandler(BaseHandler):
         except:
             return ''
 
+class ImgHandler(BaseHandler):
+    def get(self, id):
+        data = self.db.get('select img from word_imgs where word_id = %s', id)['img']
+        ext = imghdr.what('', h=data)
+        self.set_header('Content-Type', 'image/'+ext)
+        self.set_header('Cache-Control', 'max-age=30758400')
+        self.write(data)
+
 class CronHandler(BaseHandler):
     def get(self, job):
         n = self.db.execute_rowcount("""
@@ -367,6 +395,7 @@ settings = {
 app = tornado.wsgi.WSGIApplication([
     (r"/", FrontPageHandler),
     (r"/api/(.*)", RpcHandler),
+    (r"/img/(.*)", ImgHandler),
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
     (r"/howto", HowtoHandler),

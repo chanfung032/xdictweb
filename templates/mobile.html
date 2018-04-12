@@ -88,9 +88,10 @@ angular.module('myApp', [
                         <br/>
                         <div class="text-center"><h1>{{words[current].word}}</h1></div>
                         <br/>
-                        <div ng-if="showMeaning">
-                            <div class="text-center" ng-show="words[current].phonetic"><p>[{{words[current].phonetic}}]</p></div>
-                            <div class="text-center"><p>{{words[current].meaning}}</p></div>
+                        <div ng-if="showMeaning" class="text-center">
+                            <p ng-show="words[current].phonetic">[{{words[current].phonetic}}]</p>
+                            <p>{{words[current].meaning}}</p>
+                            <img ng-src="/img/{{words[current].id}}" ng-if="words[current].img">
                         </div>
                     </div>
                 </div>
