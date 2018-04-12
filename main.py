@@ -184,17 +184,17 @@ class RpcHandler(BaseHandler):
 
     def _list(self, uid, start=None, limit=10000, fill=False):
         words = self.db.query("""
-            select id, word, phonetic, meaning, hits, recites from wordlist s
+            select id, word, phonetic, meaning, hits, recites from words s
             where s.weibo_uid = %s and s.hits > 0
             order by s.updated_at desc, s.hits desc, s.id
             limit %s
         """, uid, int(limit))
         if fill and len(words) == 0:
             r = self.db.get('''
-                select min(recites) as r from wordlist where recites >= 6 and weibo_uid = %s
+                select min(recites) as r from words where recites >= 6 and weibo_uid = %s
             ''', uid).r
             words = self.db.query("""
-                SELECT id, word, phonetic, meaning, hits, recites FROM wordlist where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
+                SELECT id, word, phonetic, meaning, hits, recites FROM words where weibo_uid = %s and hits < 0 and recites = %s ORDER BY RAND() LIMIT %s
             """, uid, r, int(limit))
 
         h = lambda o: o.isoformat() \
@@ -203,7 +203,7 @@ class RpcHandler(BaseHandler):
 
     def _review(self, uid, start=0, limit=10000):
         words = self.db.query("""
-            select id,word,phonetic,meaning,abs(hits) as hits,recites from wordlist s
+            select id,word,phonetic,meaning,abs(hits) as hits,recites from words s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), updated_at) = 0
             order by updated_at desc
             limit %s, %s
@@ -215,7 +215,7 @@ class RpcHandler(BaseHandler):
 
     def _sy(self, uid):
         words = self.db.query("""
-            select word,phonetic,sy as meaning,abs(hits) as hits,recites from wordlist s
+            select word,phonetic,sy as meaning,abs(hits) as hits,recites from words s
             where s.weibo_uid = %s and s.hits < 0 and datediff(now(), updated_at) = 0
             order by updated_at desc
         """, uid)
@@ -226,7 +226,7 @@ class RpcHandler(BaseHandler):
 
     def _like(self, uid, word):
         words = self.db.query("""
-            select * from wordlist where word sounds like %s and word <> %s
+            select * from words where word sounds like %s and word <> %s
         """, word, word)
         h = lambda o: o.isoformat() \
                 if isinstance(o, datetime.datetime) else None
@@ -236,18 +236,18 @@ class RpcHandler(BaseHandler):
         if id is None:
             self.send_response(1, "invalid request")
         self.db.execute("""
-            delete from wordlist where id = %s and weibo_uid = %s
+            delete from words where id = %s and weibo_uid = %s
         """, id, uid)
 
     def _update(self, uid, word, **kws):
         id_ = kws.get('id', -1)
         if id_ != -1:
             self.db.execute('''
-                update wordlist set word=%s, phonetic=%s, meaning=%s where id=%s
+                update words set word=%s, phonetic=%s, meaning=%s where id=%s
             ''', word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('id'))
         else:
             id_ = self.db.execute_lastrowid('''
-                insert into wordlist(weibo_uid, word, phonetic, meaning, sy, rel, hits, recites)
+                insert into words(weibo_uid, word, phonetic, meaning, sy, rel, hits, recites)
                 values(%s, %s, %s, %s, '', '', 1, 0)
                 on duplicate key update phonetic=%s, meaning=%s, hits=abs(hits), recites=0
             ''', uid, word, kws.get('phonetic', ''), kws.get('meaning', ''), kws.get('phonetic', ''), kws.get('meaning', ''))
@@ -258,7 +258,7 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            update wordlist
+            update words
             set hits = 0 - abs(hits), recites = recites + if(recites < 6, 0, 1)
             where id = %s and weibo_uid = %s
         """, id, uid)
@@ -268,7 +268,7 @@ class RpcHandler(BaseHandler):
             self.send_response(1, "invalid request")
 
         self.db.execute("""
-            update wordlist set
+            update words set
                 hits = abs(hits),
                 difficulty = difficulty + if(recites >= 6 and datediff(now(), updated_at) > 0, 1, 0),
                 recites = 0
@@ -279,10 +279,10 @@ class RpcHandler(BaseHandler):
         if id is None:
             self.send_response(1, "invalid request")
         info = self.db.query('''
-            select recites, count(1) as count from wordlist where weibo_uid = %s group by recites
+            select recites, count(1) as count from words where weibo_uid = %s group by recites
         ''', uid)
         new = self.db.get('''
-            select count(1) as count from wordlist where weibo_uid = %s and datediff(now(), created_at) = 0
+            select count(1) as count from words where weibo_uid = %s and datediff(now(), created_at) = 0
         ''', uid)['count']
         self.send_response(0, {"new": new, "r2c": info})
 
@@ -308,18 +308,18 @@ class RpcHandler(BaseHandler):
         d = {k: re.sub(r'\s+', ' ', v.strip()) if type(v) == unicode else v for k, v in d.iteritems()}
 
         rc = self.db.get("""
-                select hits from wordlist s
+                select hits from words s
                 where s.word = %s and weibo_uid = %s
             """, d['word'], uid)
         if rc is None:
             phonetic = self.get_phonetic(d['word'])
             self.db.execute("""
-                insert into wordlist(weibo_uid,word,meaning,phonetic,hits,sy)
+                insert into words(weibo_uid,word,meaning,phonetic,hits,sy)
                 values(%s, %s, %s, %s, 1, %s)
             """, uid, d['word'], d['meaning'], phonetic, sy(d))
         else:
             self.db.execute("""
-                update wordlist set hits = abs(hits)+1, recites = 0
+                update words set hits = abs(hits)+1, recites = 0
                 where word = %s and weibo_uid = %s
             """, d['word'], uid)
         self.send_response(0, "ok")
@@ -340,7 +340,7 @@ class RpcHandler(BaseHandler):
 class CronHandler(BaseHandler):
     def get(self, job):
         n = self.db.execute_rowcount("""
-            update wordlist set recites = recites - 1
+            update words set recites = recites - 1
             where recites > 1 and hits > 0 and datediff(now(), updated_at) > 7
         """)
         self.write('%s word(s) downgraded' % n)
@@ -351,7 +351,7 @@ class CronHandler(BaseHandler):
         n = 0
         for i in reversed(range(6)):
             n += self.db.execute_rowcount("""
-                update wordlist set hits = abs(hits), recites = recites+1
+                update words set hits = abs(hits), recites = recites+1
                 where hits < 0 and recites = %s and datediff(now(), updated_at) mod 33 = %s
             """, i, 2**i)
             time.sleep(1)

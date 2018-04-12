@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- 表的结构 `wordlist`
 --
 
-CREATE TABLE IF NOT EXISTS `wordlist` (
+CREATE TABLE IF NOT EXISTS `words` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `weibo_uid` bigint(20) NOT NULL,
   `word` varchar(32) NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `wordlist` (
   `meaning` varchar(256) NOT NULL,
   `hits` int(11) NOT NULL COMMENT '查询次数',
   `recites` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '记诵次数',
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `weibo_uid` (`weibo_uid`)
