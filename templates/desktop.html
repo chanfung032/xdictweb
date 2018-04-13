@@ -134,14 +134,14 @@ form[editable-form] > div {margin: 10px 0;}
               <td class="hits">{{w.hits}}</td>
               <td class="sn" style="white-space: nowrap">
 				  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
-                      <button class="btn btn-default btn-sm" disabled><span class="glyphicon glyphicon-picture"></span></button>
 					  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span></button>
 					  <button type="button" ng-disabled="rowform.$waiting" ng-click="cancel(rowform, $index)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
+                      <button class="btn btn-default btn-sm" disabled><span class="glyphicon glyphicon-picture"></span></button>
 				  </form>
 				  <div ng-show="!rowform.$visible">
-                      <button class="btn btn-default btn-sm" ng-click="upload(w.id, $index)"><span ng-style="{'color': w.img ? 'tomato': 'black'}" class="glyphicon glyphicon-picture"></span></button>
 					  <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>
 					  <button class="btn btn-default btn-sm" ng-click="delete(w.id)"><span class="glyphicon glyphicon-trash"></span></button>
+                      <button class="btn btn-default btn-sm" ng-click="upload(w.id, $index)"><span ng-style="{'color': w.img ? 'tomato': 'black'}" class="glyphicon glyphicon-picture"></span></button>
 				  </div>
               </td>
             </tr>
