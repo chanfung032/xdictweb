@@ -18,6 +18,10 @@ angular.module('myApp', [
     editableOptions.theme = 'bs3';
 })
 .controller("XdictController", function($scope, $http) {
+    $scope.f = function(i) {
+        return $scope.words.findIndex(function(e) { return e.id == i});
+    };
+
 	$scope.go = function(api) {
 		$scope.api = api;
 		$http.get($scope.api).then(function(response) {
@@ -45,13 +49,19 @@ angular.module('myApp', [
     }
 
     $scope.update = function(data, id) {
-        return $http.post('/api/update', {id: id, word: data.word, meaning: data.meaning, phonetic: data.phonetic});
+        return $http.post('/api/update', {id: id, word: data.word, meaning: data.meaning, phonetic: data.phonetic}).then(function(r) {
+            if (id == -1) {
+                var i = $scope.f(id);
+                if (i != -1) $scope.words[i].id = r.data;
+            }
+        });
     }
 
-    $scope.upload = function(id, idx) {
+    $scope.upload = function(id) {
         var url = prompt("请输入图片URL或者复制的图片");
         if (url != null) $http.post("/api/upload", {id: id, url: url}).then(function(r) {
-            $scope.words[idx].img = url ? 1 : 0;
+            var i = $scope.f(id);
+            if (i != -1) $scope.words[i].img = url ? 1 : 0;
         });
     }
 
@@ -59,8 +69,8 @@ angular.module('myApp', [
         if (!confirm("确认要删除？")) return;
 
         $http.get('/api/delete?id=' + id).then(function(response) {
-            var xv = function(a, f) { var i = a.findIndex(f); if (i != -1) a.splice(i, 1) };
-			xv($scope.words, function(e) { return e.id == id });
+            var i = $scope.f(id);
+            if (i != -1) $scope.words.splice(i, 1);
         });
     };
 
@@ -141,7 +151,7 @@ form[editable-form] > div {margin: 10px 0;}
 				  <div ng-show="!rowform.$visible">
 					  <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>
 					  <button class="btn btn-default btn-sm" ng-click="delete(w.id)"><span class="glyphicon glyphicon-trash"></span></button>
-                      <button class="btn btn-default btn-sm" ng-click="upload(w.id, $index)"><span ng-style="{'color': w.img ? 'tomato': 'black'}" class="glyphicon glyphicon-picture"></span></button>
+                      <button class="btn btn-default btn-sm" ng-click="upload(w.id)"><span ng-style="{'color': w.img ? 'tomato': 'black'}" class="glyphicon glyphicon-picture"></span></button>
 				  </div>
               </td>
             </tr>
