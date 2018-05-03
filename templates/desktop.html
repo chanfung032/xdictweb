@@ -86,7 +86,7 @@ angular.module('myApp', [
                 }
             }
             var detail = response.data.r2c.map(function(e) {return e.recites + " | " + e.count}).join("\n");
-            alert(detail + "\n==========\n" + "总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new);
+            alert("总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new + "\n==========\n" + detail);
         });
     }
 })
