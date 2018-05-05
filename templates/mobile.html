@@ -21,8 +21,8 @@ angular.module('myApp', [
 .filter('fmt', function() {
   return function(input, keyword) {
     input = input || '';
-    out = input.replace(keyword, '<i>$&</i>').split(/\d+\. /g);
-    return out.length < 2 ? out[0] : ('<ul><li>' + out.slice(1).join('</li><li>') + '</li></ul>');
+    out = input.replace(new RegExp(keyword, 'gi'), '<i>$&</i>').split(/\d+\. /g);
+    return out.length < 2 ? out[0] : ('<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
   };
 })
 .controller("XdictController", function($scope, $http) {
@@ -82,7 +82,7 @@ angular.module('myApp', [
 });
     </script>
     <style type="text/css">
-.meaning ul {
+.meaning ol {
     text-align: left;
 }
     </style>
