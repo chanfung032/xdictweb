@@ -10,13 +10,21 @@
     <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.min.js"></script>
     <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.gestures.min.js"></script>
     <script src="static/bower_components/ios-dblclick/ios-dblclick.js"></script>
-
+    <script src="static/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
     <script type="text/javascript">
 angular.module('myApp', [
+    'ngSanitize',
     'mobile-angular-ui',
     'mobile-angular-ui.gestures',
     'iosDblclick'
 ])
+.filter('fmt', function() {
+  return function(input, keyword) {
+    input = input || '';
+    out = input.replace(keyword, '<i>$&</i>').split(/\d+\. /g);
+    return out.length < 2 ? out[0] : ('<ul><li>' + out.slice(1).join('</li><li>') + '</li></ul>');
+  };
+})
 .controller("XdictController", function($scope, $http) {
     $scope.words = [];
     $scope.current = 0;
@@ -73,6 +81,11 @@ angular.module('myApp', [
     $scope.next(0);
 });
     </script>
+    <style type="text/css">
+.meaning ul {
+    text-align: left;
+}
+    </style>
   </head>
   <body ng-app="myApp">
     <div class="app" ng-controller="XdictController">
@@ -94,7 +107,7 @@ angular.module('myApp', [
                         <br/>
                         <div ng-if="showMeaning" class="text-center">
                             <p ng-show="words[current].phonetic">[{{words[current].phonetic}}]</p>
-                            <p>{{words[current].meaning}}</p>
+                            <p class="meaning" ng-bind-html="words[current].meaning | fmt:words[current].word"></p>
                             <img ng-src="/img/{{words[current].id}}" ng-if="words[current].img">
                         </div>
                     </div>
