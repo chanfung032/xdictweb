@@ -402,6 +402,7 @@ app = tornado.wsgi.WSGIApplication([
     (r"/logout", LogoutHandler),
     (r"/howto", HowtoHandler),
     (r"/cron/(.*)", CronHandler),
+    (r"/(kana\.html)", tornado.web.StaticFileHandler, {"path": "templates"}),
 ], **settings)
 
 

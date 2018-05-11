@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <link rel="stylesheet" href="/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-hover.min.css" />
+    <link rel="stylesheet" href="/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-base.min.css" />
+    <script src="/static/bower_components/angular/angular.min.js"></script>
+    <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.min.js"></script>
+    <script src="/static/bower_components/mobile-angular-ui/dist/js/mobile-angular-ui.gestures.min.js"></script>
+    <script src="/static/bower_components/ios-dblclick/ios-dblclick.js"></script>
+    <script src="/static/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+    <script type="text/javascript">
+angular.module('myApp', [
+    'ngSanitize',
+    'mobile-angular-ui',
+    'mobile-angular-ui.gestures',
+    'iosDblclick'
+])
+.controller("XdictController", function($scope, $http) {
+    var data = 'あ ア a/い イ i/う ウ u/え エ e/お オ o/か カ ka/き キ ki/く ク ku/け ケ ke/こ コ ko/さ サ sa/し シ shi/す ス su/せ セ se/そ ソ so/た タ ta/ち チ chi/つ ツ tsu/て テ te/と ト to/な ナ na/に ニ ni/ぬ ヌ nu/ね ネ ne/の ノ no/は ハ ha/ひ ヒ hi/ふ フ fu/へ ヘ he/ほ ホ ho/ま マ ma/み ミ mi/む ム mu/め メ me/も モ mo/や ヤ ya/ゆ ユ yu/よ ヨ yo/ら ラ ra/り リ ri/る ル ru/れ レ re/ろ ロ ro/わ ワ wa/を ヲ wo(o)/ん ン n';
+	$scope.shuffle = function (a) {
+		var j, x, i;
+		for (i = a.length; i; i--) {
+			j = Math.floor(Math.random() * i);
+			x = a[i - 1];
+			a[i - 1] = a[j];
+			a[j] = x;
+		}
+        return a;
+    };
+    $scope.words = data.split('/');
+    $scope.idx = $scope.shuffle(data.split(/ |\//).filter((v, i) => i % 3 != 2).map((v, i) => [v, Math.floor(i/2)]));
+    $scope.current = 0;
+    $scope.showMeaning = 0;
+
+    $scope.forget = function() {
+        if ($scope.showMeaning) {
+            $scope.next(0);
+        } else {
+            $scope.showMeaning = 1;
+        }
+    };
+
+    $scope.next = function(markAsRememberd) {
+        var step = 1;
+        if (markAsRememberd) {
+            $scope.idx.splice($scope.current, 1);
+            step = 0;
+        }
+        $scope.current = ($scope.current + step) % $scope.idx.length;
+        $scope.showMeaning = 0;
+    };
+});
+    </script>
+    <style type="text/css">
+.meaning ol {
+    text-align: left;
+}
+    </style>
+  </head>
+  <body ng-app="myApp">
+    <div class="app" ng-controller="XdictController">
+        <div class="navbar navbar-app navbar-absolute-top">
+            <div class="navbar-brand navbar-brand-center">五十音 ({{idx.length}})</div>
+        </div>
+        <div class="navbar navbar-app navbar-absolute-bottom">
+            <div class="btn-group justified">
+                <a href="#" class="btn btn-navbar" ng-click="forget()"><i class="fa fa-navbar"></i> 不记得</a>
+                <a href="#" class="btn btn-navbar" ng-click="next(1)"><i class="fa fa-navbar"></i> 记得</a>
+            </div>
+        </div>
+        <div class='app-body' >
+            <div class='app-content'>
+                <div class="scrollable">
+                    <div class="scrollable-content section" ios-dblclick="forget()" ui-swipe-left="next(0)" ng-style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}">
+                        <br/>
+                        <div class="text-center"><h1>{{idx[current][0]}}</h1></div>
+                        <br/>
+                        <div ng-if="showMeaning" class="text-center">
+                            <p class="meaning"><h4 ng-bind-html="words[idx[current][1]]"></h4></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
