@@ -219,6 +219,17 @@ class RpcHandler(BaseHandler):
                 if isinstance(o, datetime.datetime) else None
         self.send_response(0, words, h)
 
+    def _search(self, uid, k):
+        words = self.db.query("""
+            select id,word,phonetic,meaning,abs(hits) as hits,recites, img is not null as img
+            from words s left join word_imgs on s.id = word_imgs.word_id
+            where s.weibo_uid = %s and s.word like %s
+            limit 10
+        """, uid, '%%%s%%' % k)
+        h = lambda o: o.isoformat() \
+                if isinstance(o, datetime.datetime) else None
+        self.send_response(0, words, h)
+
     def _sy(self, uid):
         words = self.db.query("""
             select word,phonetic,sy as meaning,abs(hits) as hits,recites from words s

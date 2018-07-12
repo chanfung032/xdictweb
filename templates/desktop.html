@@ -17,18 +17,36 @@ angular.module('myApp', [
     editableThemes.bs3.buttonsClass = 'btn-sm';
     editableOptions.theme = 'bs3';
 })
-.controller("XdictController", function($scope, $http) {
+.controller("XdictController", function($scope, $http, $timeout) {
     $scope.f = function(i) {
         return $scope.words.findIndex(function(e) { return e.id == i});
     };
 
-	$scope.go = function(api) {
-		$scope.api = api;
-		$http.get($scope.api).then(function(response) {
+	$scope.go = function(api, n) {
+        if (!n) {
+            $scope.api = api;
+        }
+		$http.get(api).then(function(response) {
 			$scope.words = response.data;
 		});
 	};
 	$scope.go('/api/list');
+
+    var timer = null;
+    $scope.$watch("search", function(nv, ov) {
+        console.log(nv);
+        $timeout.cancel(timer);
+        timer = $timeout(function() {
+            $timeout.cancel(timer);
+            if (nv === ov) return;
+            console.log(nv, ov);
+            if (nv == '') {
+                $scope.go($scope.api);
+            } else {
+				$scope.go('/api/search?k='+nv, 1);
+            }
+        }, 300);
+    });
 
 	$scope.add = function() {
 		$scope.inserted = {id: -1, word: '', phonetic: '', meaning: '', hits: 1};
@@ -117,6 +135,11 @@ form[editable-form] > div {margin: 10px 0;}
               <li ng-class="{active: api == '/api/review'}"><a href="#" ng-click="go('/api/review')">复习</a></li>
               <li><a href="#" ng-click="info()">统计</a></li>
             </ul>
+            <div class="col-sm-3 col-md-3 navbar-right">
+              <form class="navbar-form" role="search">
+                  <input type="text" class="form-control" placeholder="搜索" ng-model="search">
+              </form>
+            </div>
           </div>
         </div>
       </nav>
