@@ -34,12 +34,10 @@ angular.module('myApp', [
 
     var timer = null;
     $scope.$watch("search", function(nv, ov) {
-        console.log(nv);
         $timeout.cancel(timer);
         timer = $timeout(function() {
             $timeout.cancel(timer);
             if (nv === ov) return;
-            console.log(nv, ov);
             if (nv == '') {
                 $scope.go($scope.api);
             } else {
