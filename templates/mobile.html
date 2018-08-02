@@ -103,7 +103,7 @@ angular.module('myApp', [
                 <div class="scrollable">
                     <div class="scrollable-content section" ios-dblclick="forget()" ui-swipe-left="next(0)" ng-style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}">
                         <br/>
-                        <div class="text-center"><h1>{{words[current].word}}</h1></div>
+                        <div class="text-center"><h1 ng-bind-html="words[current].word"></h1></div>
                         <br/>
                         <div ng-if="showMeaning" class="text-center">
                             <p ng-show="words[current].phonetic">[{{words[current].phonetic}}]</p>
