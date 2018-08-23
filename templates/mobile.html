@@ -18,11 +18,11 @@ angular.module('myApp', [
     'mobile-angular-ui.gestures',
     'iosDblclick'
 ])
-.filter('fmt', function() {
+.filter('render', function() {
   return function(input, keyword) {
     input = input || '';
     out = input.replace(new RegExp(keyword, 'gi'), '<i>$&</i>').split(/\d+\. /g);
-    return out.length < 2 ? out[0] : ('<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
+    return out.length < 2 ? out[0] : (out[0] + '<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
   };
 })
 .controller("XdictController", function($scope, $http) {
@@ -110,7 +110,7 @@ angular.module('myApp', [
                         <br/>
                         <div ng-if="showMeaning" class="text-center">
                             <p ng-show="words[current].phonetic">[{{words[current].phonetic}}]</p>
-                            <p class="meaning" ng-bind-html="words[current].meaning | fmt:words[current].word"></p>
+                            <p class="meaning" ng-bind-html="words[current].meaning | render:words[current].word"></p>
                             <img ng-src="/img/{{words[current].id}}" ng-if="words[current].img">
                         </div>
                     </div>
