@@ -345,7 +345,7 @@ class RpcHandler(BaseHandler):
                 where s.word = %s and weibo_uid = %s
             """, d['word'], uid)
         if rc is None:
-            phonetic = self.get_phonetic(d['word'])
+            phonetic = d['phonetic'] if 'phonetic' in d else self.get_phonetic(d['word'])
             self.db.execute("""
                 insert into words(weibo_uid,word,meaning,phonetic,hits,sy)
                 values(%s, %s, %s, %s, 1, %s)
