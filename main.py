@@ -317,7 +317,10 @@ class RpcHandler(BaseHandler):
         new = self.db.get('''
             select count(1) as count from words where weibo_uid = %s and datediff(now(), created_at) = 0
         ''', uid)['count']
-        self.send_response(0, {"new": new, "r2c": info})
+        other = self.db.get('''
+            select count(1) as count from words where weibo_uid = %s and word not regexp '^[a-zA-Z0-9[:punct:][:space:]_-]+$'
+        ''', uid)['count']
+        self.send_response(0, {"new": new, "other": other, "r2c": info})
 
     def _add(self, uid):
         self.set_header('Access-Control-Allow-Origin', self.request.headers.get('origin'))

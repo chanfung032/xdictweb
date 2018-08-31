@@ -102,7 +102,7 @@ angular.module('myApp', [
                 }
             }
             var detail = response.data.r2c.map(function(e) {return e.recites + " |" + '|'.repeat(e.count/100) + ' ' + e.count}).join("\n");
-            alert("总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new + "\n==========\n" + detail);
+            alert("总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new + ", 非英语:" + response.data.other + "\n==========\n" + detail);
         });
     }
 })
