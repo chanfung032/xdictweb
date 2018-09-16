@@ -21,7 +21,7 @@ angular.module('myApp', [
 .filter('render', function() {
   return function(input, keyword) {
     input = input || '';
-    out = input.replace(new RegExp(keyword, 'gi'), '<i>$&</i>').split(/\d+\. /g);
+    out = input.replace(new RegExp(keyword, 'gi'), '<em>$&</em>').split(/\d+\. /g);
     return out.length < 2 ? out[0] : (out[0] + '<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
   };
 })
@@ -87,6 +87,12 @@ angular.module('myApp', [
 }
 .meaning table, th, td {
     border: 1px solid black;
+}
+
+.meaning em {
+    font-style: normal;
+    font-weight: bold;
+    color: #638c0b;
 }
     </style>
   </head>
