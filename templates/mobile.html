@@ -21,7 +21,7 @@ angular.module('myApp', [
 .filter('render', function() {
   return function(input, keyword) {
     input = input || '';
-    out = input.replace(new RegExp(keyword, 'gi'), '<em>$&</em>').split(/\d+\. /g);
+    out = input.replace(/[:：]/g, '<br>').replace(new RegExp(keyword, 'gi'), '<em>$&</em>').split(/\d+\. /g);
     return out.length < 2 ? out[0] : (out[0] + '<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
   };
 })
