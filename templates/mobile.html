@@ -18,6 +18,11 @@ angular.module('myApp', [
     'mobile-angular-ui.gestures',
     'iosDblclick'
 ])
+.filter('em', function() {
+  return function(input) {
+      return (input || '').replace(/[っょゅゃ]/g, '<sub>$&</sub>');
+  };
+})
 .filter('render', function() {
   return function(input, keyword) {
     input = input || '';
@@ -111,7 +116,7 @@ angular.module('myApp', [
                         <div class="text-center"><h1 ng-bind-html="words[current].word"></h1></div>
                         <br/>
                         <div ng-if="showMeaning" class="text-center">
-                            <p ng-show="words[current].phonetic">[{{words[current].phonetic}}]</p>
+                            <p ng-show="words[current].phonetic">[<span ng-bind-html="words[current].phonetic | em"></span>]</p>
                             <p class="meaning" ng-bind-html="words[current].meaning | render:words[current].word"></p>
                             <img ng-src="/img/{{words[current].id}}" ng-if="words[current].img">
                         </div>
