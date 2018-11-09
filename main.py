@@ -402,10 +402,10 @@ class CronHandler(BaseHandler):
         self.write(', %s word(s) updated for review' % n)
 
         min_recites = self.db.get('select min(recites) as r from words where recites >= 7')['r']
-        if min_recites and min_recites > 7:
+        if min_recites and min_recites > 8:
             n = self.db.execute_rowcount('''
-                update words set recites=recites-%s where recites > 7
-            ''', min_recites-7)
+                update words set recites=recites-%s where recites > 8
+            ''', min_recites-8)
             self.write(', %s reseted' % n)
 
 
