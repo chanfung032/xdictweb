@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>背单词</title>
+    <title>単語帳</title>
     <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
     <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.css" />
 	<link rel="stylesheet" href="/static/bower_components/angular-xeditable/dist/css/xeditable.css" />
@@ -74,7 +74,7 @@ angular.module('myApp', [
     }
 
     $scope.upload = function(id) {
-        var url = prompt("请输入图片URL或者复制的图片");
+        var url = prompt("画像のURLまたはコピーした画像を入力してください");
         if (url != null) $http.post("/api/upload", {id: id, url: url}).then(function(r) {
             var i = $scope.f(id);
             if (i != -1) $scope.words[i].img = url ? 1 : 0;
@@ -82,7 +82,7 @@ angular.module('myApp', [
     }
 
     $scope.delete = function(id) {
-        if (!confirm("确认要删除？")) return;
+        if (!confirm("削除することを確認しますか？")) return;
 
         $http.get('/api/delete?id=' + id).then(function(response) {
             var i = $scope.f(id);
@@ -102,7 +102,7 @@ angular.module('myApp', [
                 }
             }
             var detail = response.data.r2c.map(function(e) {return e.recites + " |" + '|'.repeat(e.count/100) + ' ' + e.count}).join("\n");
-            alert("总: " + total+ ", 记住: " + total_r + ", 进行中: " + (total-total_r) + ", 新增: " + response.data.new + ", 非英语:" + response.data.other + "\n==========\n" + detail);
+            alert("合計: " + total+ ", 覚えた: " + total_r + ", 学習中: " + (total-total_r) + ", 新規: " + response.data.new + ", 非英語:" + response.data.other + "\n==========\n" + detail);
         });
     }
 })
@@ -125,17 +125,17 @@ form[editable-form] > div {margin: 10px 0;}
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">背单词</a>
+            <a class="navbar-brand" href="#">単語帳</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li ng-class="{active: api == '/api/list'}"><a href="#" ng-click="go('/api/list')">待背</a></li>
-              <li ng-class="{active: api == '/api/review'}"><a href="#" ng-click="go('/api/review')">复习</a></li>
-              <li><a href="#" ng-click="info()">统计</a></li>
+              <li ng-class="{active: api == '/api/list'}"><a href="#" ng-click="go('/api/list')">学習中</a></li>
+              <li ng-class="{active: api == '/api/review'}"><a href="#" ng-click="go('/api/review')">復習</a></li>
+              <li><a href="#" ng-click="info()">統計情報</a></li>
             </ul>
             <div class="col-sm-3 col-md-3 navbar-right">
               <form class="navbar-form" role="search">
-                  <input type="text" class="form-control" placeholder="搜索" ng-model="search">
+                  <input type="text" class="form-control" placeholder="検索" ng-model="search">
               </form>
             </div>
           </div>
@@ -144,15 +144,15 @@ form[editable-form] > div {margin: 10px 0;}
 
       <div id="content">
 		<div>
- 		  <button class="btn btn-default" ng-click="add()"><span class="glyphicon glyphicon-plus"></span> 新增</button> 
-		  <span class="pull-right text-muted">共 {{words.length}} 个单词</span>
+ 		  <button class="btn btn-default" ng-click="add()"><span class="glyphicon glyphicon-plus"></span> 追加</button> 
+		  <span class="pull-right text-muted">{{words.length}} 個の単語</span>
 		</div>
         <table class="table table-condensed">
           <thead>
             <tr>
-              <th width="10%">单词</td>
-              <th width="10%">音标</td>
-              <th>词义</td>
+              <th width="10%">単語</td>
+              <th width="10%">読み方</td>
+              <th>意味</td>
               <th>Hits</td>
               <th></td>
             </tr>
