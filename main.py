@@ -278,7 +278,7 @@ class RpcHandler(BaseHandler):
 
         if url.startswith('http'):
             if url.find('.gstatic.com') != -1:
-                url = 'http://ggtts.herokuapp.com/proxy?url=' + urllib.quote(url)
+                url = 'http://rss-gen.herokuapp.com/p?url=' + urllib.quote(url)
             img = urllib2.urlopen(url, timeout=30).read()
         else:
             img = base64.b64decode(url.split(',')[-1])
