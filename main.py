@@ -34,6 +34,9 @@ APP_SECRET = '594f4a061b1a481ce4e030fbd88681f9'
 callback = 'http://xdictweb.sinaapp.com/login'
 oauth = weibo.APIClient(APP_KEY, APP_SECRET, callback)
 
+# When a word's `recites` is bigger than this, it will be considered as remembered
+GRAD_RECITES = 7
+
 def _build_accesskey():
     return ''.join([random.choice(string.letters) for n in range(40)])
 
@@ -194,8 +197,8 @@ class RpcHandler(BaseHandler):
         """, uid, int(limit))
         if fill and len(words) == 0:
             r = self.db.get('''
-                select min(recites) as r from words where recites >= 6 and weibo_uid = %s
-            ''', uid).r
+                select min(recites) as r from words where recites >= %s and weibo_uid = %s
+            ''', GRAD_RECITES, uid).r
             words = self.db.query("""
                 SELECT id, word, phonetic, meaning, hits, recites, img is not null as img
                 FROM words left join word_imgs on words.id = word_imgs.word_id
@@ -292,9 +295,9 @@ class RpcHandler(BaseHandler):
 
         self.db.execute("""
             update words
-            set hits = 0 - abs(hits), recites = recites + if(recites < 6, 0, 1)
+            set hits = 0 - abs(hits), recites = recites + if(recites < %s, 0, 1)
             where id = %s and weibo_uid = %s
-        """, id, uid)
+        """, GRAD_RECITES, id, uid)
 
     def _forget(self, uid, id=None):
         if id is None:
@@ -303,10 +306,10 @@ class RpcHandler(BaseHandler):
         self.db.execute("""
             update words set
                 hits = abs(hits),
-                difficulty = difficulty + if(recites >= 6 and datediff(now(), updated_at) > 0, 1, 0),
+                difficulty = difficulty + if(recites >= %s and datediff(now(), updated_at) > 0, 1, 0),
                 recites = 0
             where id = %s and weibo_uid = %s
-        """, id, uid)
+        """, GRAD_RECITES, id, uid)
 
     def _info(self, uid):
         if id is None:
@@ -314,13 +317,15 @@ class RpcHandler(BaseHandler):
         info = self.db.query('''
             select recites, count(1) as count from words where weibo_uid = %s group by recites
         ''', uid)
+        total = sum([i['count'] for i in info])
+        graduated = sum([i['count'] for i in info if i['recites'] >= GRAD_RECITES])
         new = self.db.get('''
             select count(1) as count from words where weibo_uid = %s and datediff(now(), created_at) = 0
         ''', uid)['count']
         other = self.db.get('''
             select count(1) as count from words where weibo_uid = %s and word not regexp '^[a-zA-Z0-9[:punct:][:space:]_-]+$'
         ''', uid)['count']
-        self.send_response(0, {"new": new, "other": other, "r2c": info})
+        self.send_response(0, {"new": new, "other": other, "total": total, "graduated": graduated, "r2c": info})
 
     def _add(self, uid):
         self.set_header('Access-Control-Allow-Origin', self.request.headers.get('origin'))
@@ -393,19 +398,19 @@ class CronHandler(BaseHandler):
         time.sleep(1)
 
         n = 0
-        for i in reversed(range(6)):
+        for i in reversed(range(GRAD_RECITES)):
             n += self.db.execute_rowcount("""
                 update words set hits = abs(hits), recites = recites+1
-                where hits < 0 and recites = %s and datediff(now(), updated_at) mod 33 = %s
-            """, i, 2**i)
+                where hits < 0 and recites = %s and datediff(now(), updated_at) mod (pow(2, %s-1)+1) = %s
+            """, i, GRAD_RECITES, 2**i)
             time.sleep(1)
         self.write(', %s word(s) updated for review' % n)
 
-        min_recites = self.db.get('select min(recites) as r from words where recites >= 7')['r']
-        if min_recites and min_recites > 8:
+        min_recites = self.db.get('select min(recites) as r from words where recites >= %s'% (GRAD_RECITES+1))['r']
+        if min_recites and min_recites > GRAD_RECITES+2:
             n = self.db.execute_rowcount('''
-                update words set recites=recites-%s where recites > 8
-            ''', min_recites-8)
+                update words set recites=recites-%s where recites > %s
+            ''', min_recites-(GRAD_RECITES+2), GRADUATION_RECITES+2)
             self.write(', %s reseted' % n)
 
 

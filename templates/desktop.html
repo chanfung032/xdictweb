@@ -94,17 +94,9 @@ angular.module('myApp', [
 
     $scope.info = function() {
         $http.get('/api/info').then(function(response) {
-            var total = 0;
-            var total_r = 0;
-            for (var i = 0; i < response.data.r2c.length; i++) {
-                var e = response.data.r2c[i];
-                total += e.count;
-                if (e.recites >= 6) {
-                    total_r += e.count;
-                }
-            }
+            var d = response.data;
             var detail = response.data.r2c.map(function(e) {return e.recites + " |" + '|'.repeat(e.count/100) + ' ' + e.count}).join("\n");
-            alert("合計: " + total+ ", 覚えた: " + total_r + ", 学習中: " + (total-total_r) + ", 新規: " + response.data.new + ", 非英語:" + response.data.other + "\n==========\n" + detail);
+            alert("合計: " + d.total + ", 覚えた: " + d.graduated + ", 学習中: " + (d.total-d.graduated) + ", 新規: " + d.new + ", 非英語:" + d.other + "\n==========\n" + detail);
         });
     }
 })
