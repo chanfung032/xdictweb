@@ -5,14 +5,16 @@
     <title>単語帳</title>
     <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
     <link rel="stylesheet" href="/static/bower_components/bootstrap/dist/css/bootstrap.css" />
-	<link rel="stylesheet" href="/static/bower_components/angular-xeditable/dist/css/xeditable.css" />
+    <link rel="stylesheet" href="/static/bower_components/angular-xeditable/dist/css/xeditable.css" />
     <script src="/static/bower_components/angular/angular.min.js"></script>
-	<script src="/static/bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+    <script src="/static/bower_components/angular-xeditable/dist/js/xeditable.js"></script>
     <script src="/static/bower_components/autoheight/src/angular-autoheight.js"></script>
+    <script src="/static/bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js"></script>
     <script type="text/javascript">
 angular.module('myApp', [
     'xeditable',
-    'autoheight'
+    'autoheight',
+    'infinite-scroll'
 ])
 .run(function(editableOptions, editableThemes) {
     editableThemes.bs3.inputClass = 'input-sm';
@@ -24,15 +26,16 @@ angular.module('myApp', [
         return $scope.words.findIndex(function(e) { return e.id == i});
     };
 
-	$scope.go = function(api, n) {
+    $scope.go = function(api, n) {
         if (!n) {
             $scope.api = api;
         }
-		$http.get(api).then(function(response) {
-			$scope.words = response.data;
-		});
-	};
-	$scope.go('/api/list');
+        $http.get(api).then(function(response) {
+            $scope.totalDisplayed = 50;
+            $scope.words = response.data;
+        });
+    };
+    $scope.go('/api/list');
 
     var timer = null;
     $scope.$watch("search", function(nv, ov) {
@@ -43,15 +46,15 @@ angular.module('myApp', [
             if (nv == '') {
                 $scope.go($scope.api);
             } else {
-				$scope.go('/api/search?k='+nv, 1);
+                $scope.go('/api/search?k='+nv, 1);
             }
         }, 300);
     });
 
-	$scope.add = function() {
-		$scope.inserted = {id: -1, word: '', phonetic: '', meaning: '', hits: 1};
-		$scope.words.unshift($scope.inserted);
-	};
+    $scope.add = function() {
+        $scope.inserted = {id: -1, word: '', phonetic: '', meaning: '', hits: 1};
+        $scope.words.unshift($scope.inserted);
+    };
 
     $scope.cancel = function(form, i) {
         if (i == 0 && $scope.words[i].id == -1) {
@@ -99,6 +102,11 @@ angular.module('myApp', [
             alert("合計: " + d.total + ", 覚えた: " + d.graduated + ", 学習中: " + (d.total-d.graduated) + ", 新規: " + d.new + ", 非英語:" + d.other + "\n==========\n" + detail);
         });
     }
+
+    $scope.loadMore = function () {
+      $scope.totalDisplayed += 50;
+    };
+
 })
     </script>
     <style type="text/css">
@@ -140,10 +148,10 @@ body {
       </nav>
 
       <div id="content">
-		<div>
- 		  <button class="btn btn-default" ng-click="add()"><span class="glyphicon glyphicon-plus"></span> 追加</button> 
-		  <span class="pull-right text-muted">{{words.length}} 個の単語</span>
-		</div>
+        <div>
+           <button class="btn btn-default" ng-click="add()"><span class="glyphicon glyphicon-plus"></span> 追加</button> 
+          <span class="pull-right text-muted">{{words.length}} 個の単語</span>
+        </div>
         <table class="table table-condensed">
           <thead>
             <tr>
@@ -154,23 +162,23 @@ body {
               <th></th>
             </tr>
           </thead>
-          <tbody>
-            <tr ng-repeat="w in words" ng-style="{'background-color': w.recites == 0 ? 'white' : 'lavenderblush'}">
-			  <td><span editable-text="w.word" e-name="word" e-form="rowform" e-required e-ng-keypress="keypress($event, rowform)">{{w.word}}</span></td>
-			  <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform" e-ng-keypress="keypress($event, rowform)">{{w.phonetic ? '['+w.phonetic+ ']' : ''}}</span></td>
+          <tbody infinite-scroll='loadMore()' infinite-scroll-distance='2'>
+            <tr ng-repeat="w in words|limitTo:totalDisplayed" ng-style="{'background-color': w.recites == 0 ? 'white' : 'lavenderblush'}">
+              <td><span editable-text="w.word" e-name="word" e-form="rowform" e-required e-ng-keypress="keypress($event, rowform)">{{w.word}}</span></td>
+              <td><span editable-text="w.phonetic" e-name="phonetic" e-form="rowform" e-ng-keypress="keypress($event, rowform)">{{w.phonetic ? '['+w.phonetic+ ']' : ''}}</span></td>
               <td><span editable-textarea="w.meaning" e-name="meaning" e-form="rowform" e-autoheight e-ng-keypress="keypress($event, rowform)">{{w.meaning}}</span><br/><img ng-src="/img/{{w.id}}" ng-if="w.img"></td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn" style="white-space: nowrap">
-				  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
-					  <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span></button>
-					  <button type="button" ng-disabled="rowform.$waiting" ng-click="cancel(rowform, $index)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
+                  <form editable-form name="rowform" onbeforesave="update($data, w.id)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="w == inserted">
+                      <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span></button>
+                      <button type="button" ng-disabled="rowform.$waiting" ng-click="cancel(rowform, $index)" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-remove"></span></button>
                       <button class="btn btn-default btn-sm" disabled><span class="glyphicon glyphicon-picture"></span></button>
-				  </form>
-				  <div ng-show="!rowform.$visible">
-					  <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>
-					  <button class="btn btn-default btn-sm" ng-click="delete(w.id)"><span class="glyphicon glyphicon-trash"></span></button>
+                  </form>
+                  <div ng-show="!rowform.$visible">
+                      <button class="btn btn-default btn-sm" ng-click="rowform.$show()"><span class="glyphicon glyphicon-pencil"></span></button>
+                      <button class="btn btn-default btn-sm" ng-click="delete(w.id)"><span class="glyphicon glyphicon-trash"></span></button>
                       <button class="btn btn-default btn-sm" ng-click="upload(w.id)"><span ng-style="{'color': w.img ? 'tomato': 'black'}" class="glyphicon glyphicon-picture"></span></button>
-				  </div>
+                  </div>
               </td>
             </tr>
           </tbody>
