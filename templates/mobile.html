@@ -30,7 +30,7 @@ angular.module('myApp', [
     return out.length < 2 ? out[0] : (out[0] + '<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
   };
 })
-.controller("XdictController", function($scope, $http) {
+.controller("XdictController", function($scope, $http, $location) {
     $scope.words = [];
     $scope.current = 0;
     $scope.showMeaning = 0;
@@ -55,9 +55,10 @@ angular.module('myApp', [
         $scope._next();
     };
 
+    var limit = $location.path().replace('/','') || 50;
     $scope._next = function() {
         if ($scope.current >= $scope.words.length - 1) {
-            $http.get("/api/list?limit=50&start=&fill=1").then(function(res) {
+            $http.get("/api/list?limit="+limit+"&start=&fill=1").then(function(res) {
                 var words = $scope.shuffle(res.data);
                 if ($scope.words.length && words[0].id == $scope.words[$scope.words.length-1].id) {
                     words = words.reverse();
@@ -123,6 +124,9 @@ body {
                             <p ng-show="words[current].phonetic">[<span ng-bind-html="words[current].phonetic | em"></span>]</p>
                             <p class="meaning" ng-bind-html="words[current].meaning | render:words[current].word"></p>
                             <img ng-src="/img/{{words[current].id}}" ng-if="words[current].img">
+                            <!--
+                            <audio ng-src="/audio/{{words[current].id}}" autoplay></audio>
+                            -->
                         </div>
                     </div>
                 </div>
