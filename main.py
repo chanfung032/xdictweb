@@ -386,13 +386,22 @@ class ImgHandler(BaseHandler):
         self.set_header('Cache-Control', 'max-age=30758400')
         self.write(data)
 
+#class AudioHandler(BaseHandler):
+#    def get(self,  id):
+#        data = self.db.get('select word from words where id = %s', id)['word']
+#        r = urllib2.urlopen('http://dict.youdao.com/dictvoice?audio=%s&type=2' % urllib.quote(data))
+#        self.set_status(200)
+#        self.set_header('Content-Type', r.headers['content-type'])
+#        self.set_header('Cache-Control', 'max-age=30758400')
+#        self.write(r.read())
+
 class CronHandler(BaseHandler):
     def get(self, job):
-        n = self.db.execute_rowcount("""
-            update words set recites = recites - 1
-            where recites > 1 and hits > 0 and datediff(now(), updated_at) > 7
-        """)
-        self.write('%s word(s) downgraded' % n)
+        #n = self.db.execute_rowcount("""
+        #    update words set recites = recites - 1
+        #    where recites > 1 and hits > 0 and datediff(now(), updated_at) > 7
+        #""")
+        #self.write('%s word(s) downgraded' % n)
 
         import time
         time.sleep(1)
@@ -409,8 +418,8 @@ class CronHandler(BaseHandler):
         min_recites = self.db.get('select min(recites) as r from words where recites >= %s'% (GRAD_RECITES+1))['r']
         if min_recites and min_recites > GRAD_RECITES+2:
             n = self.db.execute_rowcount('''
-                update words set recites=recites-%s where recites > %s
-            ''', min_recites-(GRAD_RECITES+2), GRADUATION_RECITES+2)
+                update words set recites=%s where recites > %s
+            ''', GRAD_RECITES+2, GRAD_RECITES+2)
             self.write(', %s reseted' % n)
 
 
@@ -425,6 +434,7 @@ app = tornado.wsgi.WSGIApplication([
     (r"/", FrontPageHandler),
     (r"/api/(.*)", RpcHandler),
     (r"/img/(.*)", ImgHandler),
+    #(r"/audio/(.*)", AudioHandler),
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
     (r"/howto", HowtoHandler),
