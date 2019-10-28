@@ -115,13 +115,17 @@ class FrontPageHandler(BaseHandler):
         u = self.current_user
         if u:
             user_agent = self.request.headers.get('User-Agent')
-            if re.search('Android|iPhone', user_agent):
+            if re.search('iPhone', user_agent):
                 html_file = os.path.join(os.path.dirname(__file__),
                                          'templates', 'mobile.html')
                 self.write(open(html_file).read())
+            elif re.search('Android', user_agent):
+                html_file = os.path.join(os.path.dirname(__file__),
+                                         'templates', 'mobile-vue.html')
+                self.write(open(html_file).read())
             else:
                 template_file = os.path.join(os.path.dirname(__file__),
-                                             'templates', 'desktop.html')
+                                             'templates', 'desktop-vue.html')
                 self.write(open(template_file).read())
         else:
             self.redirect(self.get_login_url())

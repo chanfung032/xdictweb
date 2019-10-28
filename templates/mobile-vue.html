@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>単語帳 (ง •̀_•́)ง</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <link rel="stylesheet" href="/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-base.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue2-touch-events@2.0.0"></script>
+    </script>
+    <style type="text/css">
+body {
+    font-family: "-apple-system", BlinkMacSystemFont, "Yu Gothic", "游ゴシック", YuGothic, "游ゴシック体", "Noto Sans Japanese", "ヒラギノ角ゴ Pro W3", "メイリオ", "Hiragino
+ Kaku Gothic ProN", "MS PGothic", Osaka, "sans-serif";
+}
+.meaning ol, ul {
+    text-align: left;
+}
+.meaning table, th, td {
+    border: 1px solid black;
+}
+.meaning em {
+    font-style: normal;
+    font-weight: bold;
+    color: #638c0b;
+}
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+        <div class="navbar navbar-app navbar-absolute-bottom">
+            <div class="btn-group justified">
+                <a href="#" class="btn btn-navbar" v-on:click="forget()"><i class="fa fa-navbar"></i> 覚えてない</a>
+                <a href="#" class="btn btn-navbar" v-on:click="next(1)"><i class="fa fa-navbar"></i> 覚えた</a>
+            </div>
+        </div>
+        <div class='app-body' >
+            <div class='app-content' v-if="words.length">
+                <div class="scrollable" >
+                    <div class="scrollable-content section" v-bind:style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}" v-on:dblclick="forget()" v-touch:swipe.left="swipeHandler">
+                        <br/>
+                        <div class="text-center"><h1 v-html="words[current].word"></h1></div>
+                        <br/>
+                        <div v-if="showMeaning" class="text-center">
+                            <p v-show="words[current].phonetic">[<span v-html="em(words[current].phonetic)"></span>]</p>
+                            <p class="meaning" v-html="render(words[current].meaning, words[current].word)"></p>
+                            <img v-bind:src="'/img/' + words[current].id" v-if="words[current].img">
+                            <!--
+                            <audio ng-src="/audio/{{words[current].id}}" autoplay></audio>
+                            -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+Vue.prototype.$shuffle = function (a) {
+  var j, x, i;
+  for (i = a.length; i; i--) {
+    j = Math.floor(Math.random() * i);
+    x = a[i - 1];
+    a[i - 1] = a[j];
+    a[j] = x;
+  }
+  return a;
+};
+
+var app = new Vue({
+  el: '#app',
+
+  data: {
+    words: [],
+    current: 0,
+    showMeaning: 0,
+    limit: 50, //document.location.pathname.replace('/','') || 50,
+  },
+
+  filters: {
+  },
+
+  created: function () {
+    this.next();
+  },
+
+  methods: {
+    em: function(input) {
+      return (input || '').replace(/[っょゅゃ]/g, '<sub>$&</sub>');
+    },
+
+    render: function(input, keyword) {
+      input = input || '';
+      out = input.replace(/[:：\n]/g, '<br>').replace(new RegExp(keyword, 'gi'), '<em>$&</em>').split(/\d+\. /g);
+      return out.length < 2 ? out[0] : (out[0] + '<ol><li>' + out.slice(1).join('</li><li>') + '</li></ol>');
+    },
+
+    forget: function() {
+      if (this.showMeaning) {
+        var w = this.words.length ? this.words[this.current] : null;
+        if (w != null) {
+          this.$http.get("/api/forget?id=" + w.id);
+        }
+        this.next();
+      } else {
+        this.showMeaning = 1;
+      }
+    },
+
+    swipeHandler () {return this.next();},
+
+    next: function(markAsRememberd) {
+      var w = this.words.length ? this.words[this.current] : null;
+      if (w != null && markAsRememberd) {
+        this.$http.get("/api/ok?id=" + w.id);
+      }
+      this._next();
+    },
+
+    _next: function() {
+      if (this.current >= this.words.length - 1) {
+        this.$http.get("/api/list?limit="+this.limit+"&start=&fill=1").then(function(res) {
+          var words = this.$shuffle(res.data);
+          if (this.words.length && words[0].id == this.words[this.words.length-1].id) {
+            words = words.reverse();
+          }
+          this.words = words;
+          this.showMeaning = 0;
+          this.current = 0;
+        });
+      } else {
+        this.showMeaning = 0;
+        this.current += 1;
+      }
+    },
+  }
+});
+    </script>
+  </body>
+</html>
