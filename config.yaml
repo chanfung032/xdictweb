@@ -5,3 +5,11 @@ cron:
 - url: /cron/update
   schedule: "5 0 * * *"
   timezone: "Asia/Shanghai"
+
+handlers:
+- url: /dist/
+  static_path: dist
+- url: /css/
+  static_path: dist/css
+- url: /js/
+  static_path: dist/js

@@ -119,14 +119,16 @@ class FrontPageHandler(BaseHandler):
                 html_file = os.path.join(os.path.dirname(__file__),
                                          'templates', 'mobile.html')
                 self.write(open(html_file).read())
-            elif re.search('Android', user_agent):
-                html_file = os.path.join(os.path.dirname(__file__),
-                                         'templates', 'mobile-vue.html')
-                self.write(open(html_file).read())
             else:
-                template_file = os.path.join(os.path.dirname(__file__),
-                                             'templates', 'desktop-vue.html')
-                self.write(open(template_file).read())
+                self.redirect('/dist/index.html', permanent=True)
+            #elif re.search('Android', user_agent):
+            #    html_file = os.path.join(os.path.dirname(__file__),
+            #                             'templates', 'mobile-vue.html')
+            #    self.write(open(html_file).read())
+            #else:
+            #    template_file = os.path.join(os.path.dirname(__file__),
+            #                                 'templates', 'desktop-vue.html')
+            #    self.write(open(template_file).read())
         else:
             self.redirect(self.get_login_url())
 
