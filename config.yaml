@@ -13,3 +13,5 @@ handlers:
   static_path: dist/css
 - url: /js/
   static_path: dist/js
+- url: /favicon.ico
+  static_path: dist/favicon.ico
