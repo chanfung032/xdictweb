@@ -1,43 +1,42 @@
 <template>
-
-    <div class="app" style="position:absolute">
-      <div class="navbar navbar-app navbar-absolute-bottom">
-        <div class="btn-group justified">
-          <a href="#" class="btn btn-navbar" v-on:click="forget()">
-            <i class="fa fa-navbar"></i> 覚えてない
-          </a>
-          <a href="#" class="btn btn-navbar" v-on:click="next(1)">
-            <i class="fa fa-navbar"></i> 覚えた
-          </a>
-        </div>
+  <div class="app" style="position:absolute">
+    <div class="navbar navbar-app navbar-absolute-bottom">
+      <div class="btn-group justified">
+        <a href="#" class="btn btn-navbar" v-on:click="forget()">
+          <i class="fa fa-navbar"></i> 覚えてない
+        </a>
+        <a href="#" class="btn btn-navbar" v-on:click="next(1)">
+          <i class="fa fa-navbar"></i> 覚えた
+        </a>
       </div>
-      <div class="app-body">
-        <div class="app-content" v-if="words.length">
-          <div class="scrollable">
-            <div
-              class="scrollable-content section"
-              v-bind:style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}"
-              v-on:dblclick="forget()"
-              v-touch:swipe.left="swipeHandler"
-            >
-              <br />
-              <div class="text-center">
-                <h1 v-html="words[current].word"></h1>
-              </div>
-              <br />
-              <div v-if="showMeaning" class="text-center">
-                <p v-show="words[current].phonetic">
-                  [
-                  <span v-html="em(words[current].phonetic)"></span>]
-                </p>
-                <p class="meaning" v-html="render(words[current].meaning, words[current].word)"></p>
-                <img v-bind:src="'/img/' + words[current].id" v-if="words[current].img" />
-              </div>
+    </div>
+    <div class="app-body">
+      <div class="app-content" v-if="words.length">
+        <div class="scrollable">
+          <div
+            class="scrollable-content section"
+            v-bind:style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}"
+            v-on:dblclick="forget()"
+            v-touch:swipe.left="swipeHandler"
+          >
+            <br />
+            <div class="text-center">
+              <h1 v-html="words[current].word"></h1>
+            </div>
+            <br />
+            <div v-if="showMeaning" class="text-center">
+              <p v-show="words[current].phonetic">
+                [
+                <span v-html="em(words[current].phonetic)"></span>]
+              </p>
+              <p class="meaning" v-html="render(words[current].meaning, words[current].word)"></p>
+              <img v-bind:src="'/img/' + words[current].id" v-if="words[current].img" />
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -125,22 +124,24 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 /*
 @import url("/static/bower_components/mobile-angular-ui/dist/css/mobile-angular-ui-base.min.css") (max-width: 600px);
 */
-.meaning ol,
-ul {
-  text-align: left;
-}
-.meaning table,
-th,
-td {
-  border: 1px solid black;
-}
-.meaning em {
-  font-style: normal;
-  font-weight: bold;
-  color: #638c0b;
+@media (max-width: 600px) {
+  .meaning ol,
+  ul {
+    text-align: left;
+  }
+  .meaning table,
+  th,
+  td {
+    border: 1px solid black;
+  }
+  .meaning em {
+    font-style: normal;
+    font-weight: bold;
+    color: #638c0b;
+  }
 }
 </style>

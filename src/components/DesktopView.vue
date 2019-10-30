@@ -258,7 +258,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 /*
 @import url("/static/bower_components/bootstrap/dist/css/bootstrap.css") (min-width:600px);
 */
