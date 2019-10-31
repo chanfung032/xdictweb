@@ -55,6 +55,7 @@
                   class="form-control input-sm"
                   type="text"
                   v-model="w.word"
+                  v-focus
                   @keyup.enter="update($index, w)"
                 />
               </td>
@@ -77,7 +78,12 @@
               </td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn">
-                <button type="submit" :disabled="!w.word" @click="update($index, w)" class="btn btn-primary btn-sm">
+                <button
+                  type="submit"
+                  :disabled="!w.word"
+                  @click="update($index, w)"
+                  class="btn btn-primary btn-sm"
+                >
                   <span class="glyphicon glyphicon-ok"></span>
                 </button>
                 <button type="button" @click="cancel($index, w)" class="btn btn-default btn-sm">
@@ -137,7 +143,14 @@ export default {
     };
   },
 
-  directives: { infiniteScroll },
+  directives: {
+    infiniteScroll,
+    focus: {
+      inserted: function(el) {
+        el.focus();
+      }
+    }
+  },
 
   created: function() {
     return this.go("/api/list");
@@ -199,6 +212,7 @@ export default {
     },
 
     update: function($index, w) {
+      if (!w.word) return;
       return this.$http.post("/api/update", w).then(function(r) {
         w.$e = 0;
         if (w.id == -1) {
@@ -269,6 +283,6 @@ table input {
   white-space: nowrap;
 }
 button:focus {
-  outline:none;
+  outline: none;
 }
 </style>
