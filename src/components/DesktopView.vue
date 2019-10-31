@@ -77,7 +77,7 @@
               </td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn">
-                <button type="submit" @click="update($index, w)" class="btn btn-primary btn-sm">
+                <button type="submit" :disabled="!w.word" @click="update($index, w)" class="btn btn-primary btn-sm">
                   <span class="glyphicon glyphicon-ok"></span>
                 </button>
                 <button type="button" @click="cancel($index, w)" class="btn btn-default btn-sm">
