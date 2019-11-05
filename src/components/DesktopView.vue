@@ -56,7 +56,9 @@
                   type="text"
                   v-model="w.word"
                   v-focus
-                  @keyup.enter="update($index, w)"
+                  @keydown.13.exact.prevent="update($index, w)"
+                  @keydown.229.exact.prevent
+                  @keyup.enter.exact.prevent
                 />
               </td>
               <td>
@@ -64,7 +66,9 @@
                   class="form-control input-sm"
                   type="text"
                   v-model="w.phonetic"
-                  @keyup.enter="update($index, w)"
+                  @keydown.13.exact.prevent="update($index, w)"
+                  @keydown.229.exact.prevent
+                  @keyup.enter.exact.prevent
                 />
               </td>
               <td>
