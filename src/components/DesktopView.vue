@@ -72,8 +72,9 @@
                   rows="1"
                   class="form-control input-sm"
                   v-model="w.meaning"
-                  @keydown.enter.exact.prevent.native
-                  @keyup.enter.exact.native="update($index, w)"
+                  @keydown.13.exact.prevent.native="update($index, w)"
+                  @keydown.229.exact.prevent.native
+                  @keyup.enter.exact.prevent.native
                 />
               </td>
               <td class="hits">{{w.hits}}</td>
