@@ -218,7 +218,7 @@ export default {
 
     update: function($index, w) {
       if (!w.word) return;
-      w.meaning = w.meaning.replace(/。?／/g, '/');
+      w.meaning = w.meaning.replace(/。?[／/]/g, '/');
       return this.$http.post("/api/update", w).then(function(r) {
         w.$e = 0;
         if (w.id == -1) {
