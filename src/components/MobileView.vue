@@ -143,5 +143,8 @@ export default {
     font-weight: bold;
     color: #638c0b;
   }
+  .app-content {
+    font-size: 110%;
+  }
 }
 </style>
