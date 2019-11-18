@@ -183,6 +183,8 @@ export default {
         this.totalDisplayed = 50;
         resp.data.forEach(x => (x.$e = undefined));
         this.words = resp.data;
+      }, function(resp){
+        if (resp.status == 403) window.location.href = "/login";
       });
     },
 

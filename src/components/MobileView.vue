@@ -114,6 +114,8 @@ export default {
             this.words = words;
             this.showMeaning = 0;
             this.current = 0;
+          }, function(res) {
+            if (res.status == 403) window.location.href = '/login';
           });
       } else {
         this.showMeaning = 0;

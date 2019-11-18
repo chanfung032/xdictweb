@@ -69,19 +69,22 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_login_url(self):
         return oauth.get_authorize_url()
 
-class LoginHandler(tornado.web.RequestHandler):
+class LoginHandler(BaseHandler):
     def get(self):
-        code = self.get_argument('code')
-        t = oauth.request_access_token(code)
-        oauth.set_access_token(t.access_token, t.expires_in)
-        uid = oauth.get.account__get_uid().uid
-        info = oauth.get.users__show(uid=uid)
+        code = self.get_argument('code', None)
+        if code:
+            t = oauth.request_access_token(code)
+            oauth.set_access_token(t.access_token, t.expires_in)
+            uid = oauth.get.account__get_uid().uid
+            info = oauth.get.users__show(uid=uid)
 
-        self.set_secure_cookie('u', str(uid))
-        k = ','.join([t.access_token, str(t.expires_in)])
-        self.set_secure_cookie('accesskey', k)
+            self.set_secure_cookie('u', str(uid))
+            k = ','.join([t.access_token, str(t.expires_in)])
+            self.set_secure_cookie('accesskey', k)
 
-        self.redirect('/')
+            self.redirect('/')
+        else:
+            self.redirect(self.get_login_url())
 
 class HowtoHandler(BaseHandler):
     def get(self):
