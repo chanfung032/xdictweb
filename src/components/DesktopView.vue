@@ -80,6 +80,8 @@
                   @keydown.229.exact.prevent.native
                   @keyup.enter.exact.prevent.native
                 />
+                <br />
+                <img :src="'/img/' + w.id" v-if="w.img" />
               </td>
               <td class="hits">{{w.hits}}</td>
               <td class="sn">
@@ -179,13 +181,16 @@ export default {
       if (!n) {
         this.api = api;
       }
-      this.$http.get(api).then(function(resp) {
-        this.totalDisplayed = 50;
-        resp.data.forEach(x => (x.$e = undefined));
-        this.words = resp.data;
-      }, function(resp){
-        if (resp.status == 403) window.location.href = "/login";
-      });
+      this.$http.get(api).then(
+        function(resp) {
+          this.totalDisplayed = 50;
+          resp.data.forEach(x => (x.$e = undefined));
+          this.words = resp.data;
+        },
+        function(resp) {
+          if (resp.status == 403) window.location.href = "/login";
+        }
+      );
     },
 
     f: function(i) {
@@ -220,7 +225,7 @@ export default {
 
     update: function($index, w) {
       if (!w.word) return;
-      w.meaning = w.meaning.replace(/。?[／/]/g, '/');
+      w.meaning = w.meaning.replace(/。?[／/]/g, "/");
       return this.$http.post("/api/update", w).then(function(r) {
         w.$e = 0;
         if (w.id == -1) {
