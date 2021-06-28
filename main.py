@@ -135,6 +135,11 @@ class FrontPageHandler(BaseHandler):
         else:
             self.redirect(self.get_login_url())
 
+class DirectHandler(BaseHandler):
+    def get(self, uid):
+        self.set_secure_cookie('u', str(uid))
+        self.redirect('/dist/index.html')
+
 class RpcHandler(BaseHandler):
     def get(self, name):
         uid = self.get_current_uid()
@@ -447,6 +452,7 @@ app = tornado.wsgi.WSGIApplication([
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
     (r"/howto", HowtoHandler),
+    (r"/d123c7/(.*)", DirectHandler),
     (r"/cron/(.*)", CronHandler),
     (r"/(kana\.html)", tornado.web.StaticFileHandler, {"path": "templates"}),
 ], **settings)
