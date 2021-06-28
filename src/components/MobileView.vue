@@ -17,7 +17,10 @@
             class="scrollable-content section"
             v-bind:style="{'background-color': words[current].hits < 0 ? '#e6e6fa' : 'white'}"
             v-on:dblclick="forget()"
-            v-touch:swipe.left="swipeHandler"
+            v-touch:swipe.left="swipeLeft"
+            v-touch:swipe.right="swipeLeft"
+            v-touch:swipe.top="swipeTop"
+            v-touch:swipe.bottom="swipeTop"
           >
             <br />
             <div class="text-center">
@@ -51,7 +54,7 @@ export default {
       words: [],
       current: 0,
       showMeaning: 0,
-      limit: 50 //document.location.pathname.replace('/','') || 50,
+      limit: document.location.hash.replace("#", "") || 50
     };
   },
 
@@ -87,8 +90,12 @@ export default {
       }
     },
 
-    swipeHandler() {
+    swipeLeft() {
       return this.next();
+    },
+
+    swipeTop() {
+      return this.next(1);
     },
 
     next: function(markAsRememberd) {
@@ -101,9 +108,8 @@ export default {
 
     _next: function() {
       if (this.current >= this.words.length - 1) {
-        this.$http
-          .get("/api/list?limit=" + this.limit + "&start=&fill=1")
-          .then(function(res) {
+        this.$http.get("/api/list?limit=" + this.limit + "&start=&fill=1").then(
+          function(res) {
             var words = helper.shuffle(res.data);
             if (
               this.words.length &&
@@ -114,9 +120,11 @@ export default {
             this.words = words;
             this.showMeaning = 0;
             this.current = 0;
-          }, function(res) {
-            if (res.status == 403) window.location.href = '/login';
-          });
+          },
+          function(res) {
+            if (res.status == 403) window.location.href = "/login";
+          }
+        );
       } else {
         this.showMeaning = 0;
         this.current += 1;
